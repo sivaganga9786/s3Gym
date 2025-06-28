@@ -9,9 +9,10 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
             position: relative;
             overflow-x: hidden;
+            font-family: 'Segoe UI', sans-serif;
         }
 
         .background-wave {
@@ -33,25 +34,47 @@
             margin-bottom: 20px;
         }
 
-        .gallery img {
-            width: 100%;
-            max-height: 150px;
-            object-fit: contain;
-            border-radius: 10px;
-            background-color: #ffffffbb;
+        .gallery .col-md-4 {
+            margin-bottom: 30px;
+        }
+
+        .gallery-card {
+            background-color: #ffffffcc;
+            border-radius: 15px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
             padding: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gallery-card:hover {
+            transform: scale(1.03);
+        }
+
+        .gallery-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .btn {
             font-weight: 500;
         }
+
+        .footer-nav {
+            margin-top: 40px;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="p-4">
 
-    <!-- 🌊 Fancy SVG wave background -->
-    <svg class="background-wave" viewBox="0 0 1440 320"><path fill="#8EC5FC" fill-opacity="1" d="M0,64L48,90.7C96,117,192,171,288,170.7C384,171,480,117,576,122.7C672,128,768,192,864,208C960,224,1056,192,1152,176C1248,160,1344,160,1392,160L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>
+    <!-- 🌊 Optional SVG wave background -->
+    <svg class="background-wave" viewBox="0 0 1440 320"><path fill="#ffffff55" fill-opacity="1" d="M0,64L48,90.7C96,117,192,171,288,170.7C384,171,480,117,576,122.7C672,128,768,192,864,208C960,224,1056,192,1152,176C1248,160,1344,160,1392,160L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>
 
     <div class="container">
         <div class="d-flex justify-content-end mb-3">
@@ -70,19 +93,27 @@
             <a href="{{ url_for('index') }}" class="btn btn-primary mx-2">📋 Registered Clients</a>
         </div>
 
+        <!-- 🎯 Image Gallery -->
         <div class="row gallery">
-            <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Image 1">
+            <div class="col-md-4">
+                <div class="gallery-card">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Image 1">
+                </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym Image 2">
+            <div class="col-md-4">
+                <div class="gallery-card">
+                    <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym Image 2">
+                </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Gym Image 3">
+            <div class="col-md-4">
+                <div class="gallery-card">
+                    <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Gym Image 3">
+                </div>
             </div>
         </div>
 
-        <div class="mt-4 text-center">
+        <!-- 🔙 Back Button -->
+        <div class="footer-nav">
             <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
         </div>
     </div>

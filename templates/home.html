@@ -41,15 +41,18 @@
 
         <div class="row gallery">
             <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='logo.png') }}" alt="Gym Image 1">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Image 1">
             </div>
             <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='logo1.png') }}" alt="Gym Image 2">
+                <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym Image 2">
             </div>
             <div class="col-md-4 mb-3">
-                <img src="{{ url_for('static', filename='logo2.png') }}" alt="Gym Image 3">
+                <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Gym Image 3">
             </div>
         </div>
+    </div>
+    <div class="mt-4 text-center">
+         <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
     </div>
 </body>
 </html>

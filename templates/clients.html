@@ -27,6 +27,7 @@
                     <th>Goal</th>
                     <th>Weight</th>
                     <th>Status</th>
+                    <th>Join Date</th> <!-- ✅ Added -->
                     <th>Due Date</th>
                     <th>Image</th>
                     <th>Actions</th>
@@ -40,6 +41,7 @@
                     <td>{{ client.goal }}</td>
                     <td>{{ client.weight }} kg</td>
                     <td>{{ client.payment_status }}</td>
+                    <td>{{ client.join_date.strftime('%Y-%m-%d') }}</td> <!-- ✅ Added -->
                     <td>{{ client.payment_due_date.strftime('%Y-%m-%d') }}</td>
                     <td>
                         {% if client.profile_image %}
@@ -59,14 +61,10 @@
             </tbody>
         </table>
     </div>
+
     <div class="mt-4 text-center">
-         <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
-         <a href="{{ url_for('download_excel') }}" class="btn btn-outline-info">⬇️ Download Excel Backup</a>
-
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
+        <a href="{{ url_for('download_excel') }}" class="btn btn-outline-info">⬇️ Download Excel Backup</a>
     </div>
-
 </body>
 </html>
-
-
-

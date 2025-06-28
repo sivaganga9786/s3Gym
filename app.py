@@ -1,21 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gym.db'
 app.config['SECRET_KEY'] = 'siva-secret'
-
-# ✅ File upload settings
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 db = SQLAlchemy(app)
 
@@ -30,16 +20,15 @@ class Client(db.Model):
     join_date = db.Column(db.Date, default=datetime.utcnow)
     payment_due_date = db.Column(db.Date, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
-    profile_image = db.Column(db.String(120), nullable=True)
 
-# ✅ Route: Landing page
-@app.route('/home')
+# ✅ Home page route (this is the landing page)
+@app.route('/')
 def home():
     return render_template('home.html')
 
-# ✅ Route: Main dashboard - client list
-@app.route('/')
-def index():
+# ✅ Route: Registered clients list
+@app.route('/clients')
+def clients():
     query = request.args.get('search', '')
     today = datetime.today().date()
 
@@ -55,7 +44,7 @@ def index():
 
     return render_template("clients.html", clients=clients, upcoming_due=upcoming_due, query=query)
 
-# ✅ Route: Add client
+# ✅ Add client
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if request.method == 'POST':
@@ -67,12 +56,6 @@ def add_client():
         join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
         payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
 
-        file = request.files.get('profile_image')
-        filename = None
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
         new_client = Client(
             name=name,
             contact=contact,
@@ -81,16 +64,15 @@ def add_client():
             payment_status=payment_status,
             join_date=join_date,
             payment_due_date=payment_due_date,
-            profile_image=filename,
             last_updated=datetime.now()
         )
         db.session.add(new_client)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('clients'))
 
     return render_template('add_client.html')
 
-# ✅ Route: Edit client
+# ✅ Edit client
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
     client = Client.query.get_or_404(client_id)
@@ -102,27 +84,21 @@ def edit_client(client_id):
         client.payment_status = request.form['payment_status']
         client.join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
         client.payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
-
-        file = request.files.get('profile_image')
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            client.profile_image = filename
-
         client.last_updated = datetime.now()
+
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('clients'))
     return render_template('edit_client.html', client=client)
 
-# ✅ Route: Delete client
+# ✅ Delete client
 @app.route('/delete/<int:client_id>', methods=['POST'])
 def delete_client(client_id):
     client = Client.query.get_or_404(client_id)
     db.session.delete(client)
     db.session.commit()
-    return redirect(url_for('index'))
+    return redirect(url_for('clients'))
 
-# ✅ Route: Due clients
+# ✅ Due clients
 @app.route('/due')
 def due_clients():
     today = datetime.today().date()

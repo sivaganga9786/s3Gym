@@ -8,6 +8,64 @@
 <body class="p-4">
     <div class="container">
         <h2 class="mb-4">Add New Client</h2>
+
+        <!-- ✅ enctype added -->
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label>Name</label>
+                <input type="text" name="name" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Contact</label>
+                <input type="text" name="contact" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Fitness Goal</label>
+                <input type="text" name="goal" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Weight (kg)</label>
+                <input type="number" name="weight" step="0.1" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Payment Status</label>
+                <select name="payment_status" class="form-control">
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label>Join Date</label>
+                <input type="date" name="join_date" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label>Payment Due Date</label>
+                <input type="date" name="payment_due_date" class="form-control" required />
+            </div>
+            <!-- ✅ file upload -->
+            <div class="mb-3">
+                <label>Profile Image</label>
+                <input type="file" name="profile_image" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Add Client</button>
+            <a href="/" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
+    <div class="container">
+        <h2 class="mb-4">Add New Client</h2>
         <form method="POST">
             <div class="mb-3">
                 <label>Name</label>
@@ -37,4 +95,4 @@
         </form>
     </div>
 </body>
-</html>
+</html> -->

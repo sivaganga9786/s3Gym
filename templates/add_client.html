@@ -9,7 +9,7 @@
     <div class="container">
         <h2 class="mb-4">Add New Client</h2>
 
-        <!-- ✅ enctype added -->
+        <!-- ✅ enctype added for file uploads -->
         <form method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label>Name</label>
@@ -29,29 +29,36 @@
             </div>
             <div class="mb-3">
                 <label>Payment Status</label>
-                <select name="payment_status" class="form-control">
+                <select name="payment_status" class="form-control" required>
                     <option value="paid">Paid</option>
                     <option value="unpaid">Unpaid</option>
                 </select>
             </div>
             <div class="mb-3">
-                <label for="join_date" class="form-label">Join Date</label>
-                <input type="date" class="form-control" name="join_date" required>
+                <label>Join Date</label>
+                <input type="date" name="join_date" class="form-control" required />
             </div>
             <div class="mb-3">
                 <label>Payment Due Date</label>
                 <input type="date" name="payment_due_date" class="form-control" required />
             </div>
-            <button type="submit" class="btn btn-primary">Add Client</button>
-            <a href="/" class="btn btn-secondary">Back</a>
+            <div class="mb-3">
+                <label>Profile Image</label>
+                <input type="file" name="profile_image" class="form-control" accept="image/*" />
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">➕ Add Client</button>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back</a>
+            </div>
         </form>
     </div>
-    <div class="mt-4 text-center">
-         <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
-    </div>
 
+    <div class="mt-4 text-center">
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
+    </div>
 </body>
 </html>
+
 
 
 

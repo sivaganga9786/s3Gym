@@ -16,11 +16,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# ✅ Helper
+# ✅ File type validation
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ✅ Model
+# ✅ DB model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -33,12 +33,12 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(120), nullable=True)
 
-# ✅ Routes
-
+# ✅ Home
 @app.route('/home')
 def home():
     return render_template('home.html')
 
+# ✅ Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -50,12 +50,14 @@ def login():
         flash('Invalid credentials', 'danger')
     return render_template('login.html')
 
+# ✅ Logout
 @app.route('/logout')
 def logout():
     session.pop('admin_logged_in', None)
     flash('Logged out successfully.', 'info')
     return redirect(url_for('login'))
 
+# ✅ Index (main clients list)
 @app.route('/')
 def index():
     if 'admin_logged_in' not in session:
@@ -66,6 +68,7 @@ def index():
 
     clients = Client.query.filter(Client.name.ilike(f"%{query}%")).all() if query else Client.query.all()
 
+    # Due in next 3 days
     upcoming_due = Client.query.filter(
         Client.payment_due_date >= today,
         Client.payment_due_date <= today + timedelta(days=3)
@@ -73,6 +76,7 @@ def index():
 
     return render_template("clients.html", clients=clients, upcoming_due=upcoming_due, query=query)
 
+# ✅ Add client
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if 'admin_logged_in' not in session:
@@ -85,15 +89,8 @@ def add_client():
         weight = float(request.form['weight'])
         payment_status = request.form['payment_status']
 
-        try:
-            join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
-        except:
-            join_date = datetime.today().date()
-
-        try:
-            payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
-        except:
-            payment_due_date = datetime.today().date()
+        join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
+        payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
 
         file = request.files.get('profile_image')
         filename = None
@@ -118,6 +115,7 @@ def add_client():
 
     return render_template('add_client.html')
 
+# ✅ Edit client
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
     if 'admin_logged_in' not in session:
@@ -153,6 +151,7 @@ def edit_client(client_id):
 
     return render_template('edit_client.html', client=client)
 
+# ✅ Delete client
 @app.route('/delete/<int:client_id>', methods=['POST'])
 def delete_client(client_id):
     if 'admin_logged_in' not in session:
@@ -163,16 +162,21 @@ def delete_client(client_id):
     db.session.commit()
     return redirect(url_for('index'))
 
+# ✅ Due clients within next 3 days
 @app.route('/due')
 def due_clients():
     if 'admin_logged_in' not in session:
         return redirect(url_for('login'))
 
     today = datetime.today().date()
-    due_clients = Client.query.filter(Client.payment_due_date > today + timedelta(days=3)).all()
+    due_clients = Client.query.filter(
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= today + timedelta(days=3)
+    ).all()
 
     return render_template('due_clients.html', clients=due_clients)
 
+# ✅ Excel export
 @app.route('/download_excel')
 def download_excel():
     if 'admin_logged_in' not in session:
@@ -198,11 +202,12 @@ def download_excel():
 
     return send_file(filepath, as_attachment=True)
 
-# ✅ App start
+# ✅ App run
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 # from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file

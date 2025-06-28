@@ -23,6 +23,10 @@
 </head>
 <body class="p-4">
     <div class="container">
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">🚪 Logout</a>
+        </div>
+
         <div class="hero">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="S3 Gym Logo">
             <h1>Welcome to S3 Gym</h1>
@@ -35,7 +39,6 @@
             <a href="{{ url_for('index') }}" class="btn btn-primary mx-2">📋 Registered Clients</a>
         </div>
 
-        <!-- Optional gallery -->
         <div class="row gallery">
             <div class="col-md-4 mb-3">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="Gym Image 1">

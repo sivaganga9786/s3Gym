@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
@@ -13,12 +13,12 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+db = SQLAlchemy(app)
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-db = SQLAlchemy(app)
-
-# ✅ Client model
+# ✅ Model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -31,14 +31,12 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(120), nullable=True)
 
-# ✅ Home page (landing)
-@app.route('/home')
-def home():
-    return render_template('home.html')
-
-# ✅ Main client list
+# ✅ Routes
 @app.route('/')
 def index():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
     query = request.args.get('search', '')
     today = datetime.today().date()
 
@@ -54,9 +52,32 @@ def index():
 
     return render_template("clients.html", clients=clients, upcoming_due=upcoming_due, query=query)
 
-# ✅ Add client
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'admin' and password == 'admin123':
+            session['admin_logged_in'] = True
+            return redirect(url_for('home'))
+        flash('Invalid credentials', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    flash('Logged out successfully.', 'info')
+    return redirect(url_for('login'))
+
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         name = request.form['name']
         contact = request.form['contact']
@@ -89,9 +110,11 @@ def add_client():
 
     return render_template('add_client.html')
 
-# ✅ Edit client
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
     client = Client.query.get_or_404(client_id)
     if request.method == 'POST':
         client.name = request.form['name']
@@ -113,27 +136,30 @@ def edit_client(client_id):
         return redirect(url_for('index'))
     return render_template('edit_client.html', client=client)
 
-# ✅ Delete client
 @app.route('/delete/<int:client_id>', methods=['POST'])
 def delete_client(client_id):
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
     client = Client.query.get_or_404(client_id)
     db.session.delete(client)
     db.session.commit()
     return redirect(url_for('index'))
 
-# ✅ Due clients
 @app.route('/due')
 def due_clients():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
     today = datetime.today().date()
     due_clients = Client.query.filter(Client.payment_due_date <= today + timedelta(days=3)).all()
     return render_template('due_clients.html', clients=due_clients)
 
-# ✅ Run app
+# ✅ Run
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=10000)
 
 
 # from flask import Flask, render_template, request, redirect, url_for

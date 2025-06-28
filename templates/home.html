@@ -2,50 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gym Dashboard</title>
+    <title>Gym Management - Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
+        .offers-bar {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
         }
-        .section {
-            border: 1px solid #dee2e6;
-            padding: 25px;
-            border-radius: 10px;
-            background-color: #ffffff;
-            margin-bottom: 30px;
+
+        .offers-bar span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: scroll-left 20s linear infinite;
         }
-        .section-header {
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        .gallery img {
+            object-fit: cover;
+            height: 200px;
+        }
+
+        .logo-container {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #ccc;
         }
     </style>
 </head>
-<body class="p-4">
-    <div class="container">
-        <div class="section text-center">
-            <h2 class="section-header">🏋️‍♂️ Welcome to the Gym Management System</h2>
-            <p class="lead">Manage clients, track dues, and showcase latest offers with ease.</p>
-        </div>
+<body class="bg-light">
 
-        <div class="section">
-            <h4 class="section-header text-success">🎉 Current Offers & Discounts</h4>
-            <ul class="list-group">
-                <li class="list-group-item">🔥 20% off on 3-month memberships</li>
-                <li class="list-group-item">🏃‍♂️ Refer a friend & get 1 week free</li>
-                <li class="list-group-item">🕒 Early bird discount valid till June 30</li>
-            </ul>
-        </div>
+    <!-- Logo -->
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="80">
+        <h3 class="mt-2">Welcome to Our Gym</h3>
+    </div>
 
-        <div class="section text-center">
-            <h4 class="section-header">📌 Quick Actions</h4>
-            <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 View All Clients</a>
-            <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Add New Client</a>
-            <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">💰 Upcoming Dues</a>
-            <a href="{{ url_for('download_excel') }}" class="btn btn-outline-info m-2">⬇️ Download Backup</a>
+    <!-- Offers Bar -->
+    <div class="offers-bar">
+        <span>🔥 Summer Special: 20% OFF on all Memberships! | 💪 Bring a friend & get 1 month FREE! | 🏋️ Personal training sessions at 50% OFF this week only!</span>
+    </div>
+
+    <!-- Content -->
+    <div class="container mt-5 text-center">
+        <h4>Welcome Admin!</h4>
+        <p>Use the navigation below to manage your gym.</p>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">📋 View Clients</a>
+            <a href="{{ url_for('add_client') }}" class="btn btn-success">➕ Add New Client</a>
+            <a href="{{ url_for('due_clients') }}" class="btn btn-warning">📅 Upcoming Dues</a>
+            <a href="{{ url_for('download_excel') }}" class="btn btn-info">⬇️ Download Backup</a>
         </div>
     </div>
+
+    <!-- Gallery -->
+    <hr class="my-5">
+    <div class="container">
+        <h4 class="text-center mb-4">🏋️‍♂️ Our Gym & Equipment</h4>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 gallery">
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='images/logo1') }}" class="card-img-top" alt="Treadmill">
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='images/logo2') }}" class="card-img-top" alt="Dumbbells">
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='images/logo1') }}" class="card-img-top" alt="Yoga Area">
+                </div>
+            </div>
+            <!-- Add more image cards here as needed -->
+        </div>
+    </div>
+
+    <footer class="text-center text-muted mt-5 mb-3">
+        &copy; {{ now().year }} Gym Management App. All rights reserved.
+    </footer>
+
 </body>
 </html>
+
 

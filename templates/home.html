@@ -102,7 +102,11 @@
 </nav>
 
 
-
+<div class="offers-marquee container text-center">
+    <marquee behavior="scroll" direction="left" scrollamount="5">
+        🎉 PT Offer: Get 20% Off! | 💪 Join Now  | 🏃‍♂️ Early Bird Discount Available!
+    </marquee>
+</div>
 
 <div class="d-flex justify-content-center flex-wrap gap-5 py-4">
     <img src="{{ url_for('static', filename='images/treadmill.gif') }}" alt="Treadmill" class="rounded shadow-sm" style="height:160px;">
@@ -113,12 +117,6 @@
 
 
 <div class="container text-center">
-
-    <div class="offers-marquee">
-        <marquee behavior="scroll" direction="left" scrollamount="5">
-            🎉 Summer Offer: Get 20% Off! | 💪 Join Now & Get 1 Month Free! | 🏃‍♂️ Early Bird Discount Available!
-        </marquee>
-    </div>
 
     <div class="my-4">
         <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>

@@ -56,19 +56,21 @@
   <div class="ms-auto d-flex align-items-center gap-3">
 
     <!-- Social Icons with Tooltips -->
-    <a href="tel:+919398367605" class="text-white" title="Call">
-      📞
-    </a>
-    <a href="https://wa.me/919398367605" target="_blank" class="text-white" title="WhatsApp">
-      💬
-    </a>
-    <a href="https://www.instagram.com/s3_gym_official" target="_blank" class="text-white" title="Instagram">
-      📸
-    </a>
-    <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" target="_blank" class="text-white" title="Location">
-      📍
-    </a>
 
+    <div class="ms-3 d-flex align-items-center gap-3">
+        <a href="tel:+919398367605" title="Call">
+            <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="28" height="28">
+        </a>
+        <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
+            <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="28" height="28">
+        </a>
+        <a href="https://www.instagram.com/s3_gym_official?igsh=ODFrbDRubng4eGg1" title="Instagram" target="_blank">
+            <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="28" height="28">
+        </a>
+        <a href="https://www.facebook.com/yourpage" title="Facebook" target="_blank">
+            <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Facebook" width="28" height="28">
+        </a>
+    </div>
 
     <!-- Login/Logout Button -->
     {% if session.get('admin_logged_in') %}

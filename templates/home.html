@@ -28,6 +28,21 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        .contact-icons img {
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .contact-icons img:hover {
+            animation: bounce 0.4s ease;
+        }
+
+        @keyframes bounce {
+            0%   { transform: scale(1); }
+            30%  { transform: scale(1.2); }
+            60%  { transform: scale(0.95); }
+            100% { transform: scale(1); }
+   }
         footer {
             margin-top: 40px;
             padding: 20px 0;
@@ -53,11 +68,13 @@
     <span class="ms-2">S3 Gym</span>
   </a>
 
-  <div class="ms-auto d-flex align-items-center gap-3">
+ 
+  <div class="ms-3 d-flex align-items-center gap-3 contact-icons">
+
 
     <!-- Social Icons with Tooltips -->
 
-    <div class="ms-3 d-flex align-items-center gap-3">
+    <div class="ms-3 d-flex align-items-center gap-3 contact-icons">
         <a href="tel:+919398367605" title="Call">
             <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="28" height="28">
         </a>
@@ -67,10 +84,12 @@
         <a href="https://www.instagram.com/s3_gym_official?igsh=ODFrbDRubng4eGg1" title="Instagram" target="_blank">
             <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="28" height="28">
         </a>
-        <a href="https://www.facebook.com/yourpage" title="Facebook" target="_blank">
-            <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Facebook" width="28" height="28">
+        <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
+            <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="28" height="28">
         </a>
     </div>
+
+
 
     <!-- Login/Logout Button -->
     {% if session.get('admin_logged_in') %}

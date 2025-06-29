@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 
-# Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
@@ -41,6 +40,7 @@ class Client(db.Model):
     payment_due_date = db.Column(db.Date, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(120), nullable=True)
+    is_deleted = db.Column(db.Boolean, default=False)  # Soft delete flag
 
 @app.route('/')
 def index():
@@ -48,8 +48,12 @@ def index():
         return redirect(url_for('login'))
     query = request.args.get('search', '')
     today = datetime.today().date()
-    clients = Client.query.filter(Client.name.ilike(f"%{query}%")).all() if query else Client.query.all()
+    clients_query = Client.query.filter(Client.is_deleted == False)
+    if query:
+        clients_query = clients_query.filter(Client.name.ilike(f"%{query}%"))
+    clients = clients_query.all()
     upcoming_due = Client.query.filter(
+        Client.is_deleted == False,
         Client.payment_status == 'unpaid',
         Client.payment_due_date >= today,
         Client.payment_due_date <= today + timedelta(days=2)
@@ -71,11 +75,11 @@ def add_client():
             payment_status = request.form.get('payment_status')
 
             if not all([name, contact, gender, client_type, join_date_str, payment_status]):
-                flash("All required fields (name, contact, gender, type, join date, status) must be filled.", 'danger')
+                flash("All required fields must be filled.", 'danger')
                 return redirect(url_for('add_client'))
 
             if not contact.isdigit() or len(contact) != 10:
-                flash("Contact number must be exactly 10 digits.", 'danger')
+                flash("Contact must be exactly 10 digits.", 'danger')
                 return redirect(url_for('add_client'))
 
             join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
@@ -161,9 +165,10 @@ def edit_client(client_id):
 def delete_client(client_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
-    db.session.delete(Client.query.get_or_404(client_id))
+    client = Client.query.get_or_404(client_id)
+    client.is_deleted = True  # Soft delete
     db.session.commit()
-    flash("Client deleted.", 'info')
+    flash("Client removed from active list.", 'info')
     return redirect(url_for('index'))
 
 @app.route('/due')
@@ -173,6 +178,7 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
     due = Client.query.filter(
+        Client.is_deleted == False,
         or_(
             Client.payment_due_date < today,
             Client.payment_due_date <= next_3_days
@@ -218,7 +224,8 @@ def download_excel():
             'Weight': c.weight, 'Gender': c.gender, 'Type': c.client_type,
             'Fees': c.fees, 'Status': c.payment_status,
             'Join Date': c.join_date, 'Due Date': c.payment_due_date,
-            'Last Updated': c.last_updated
+            'Last Updated': c.last_updated,
+            'Is Deleted': c.is_deleted
         })
     df = pd.DataFrame(data)
     os.makedirs('static/backups', exist_ok=True)
@@ -230,6 +237,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 

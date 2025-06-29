@@ -7,10 +7,11 @@ import os
 
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI='sqlite:///gym.db',
+    SQLALCHEMY_DATABASE_URI='postgresql://s3gymdb_user:CjToQXSl6EAp7kY7TALHiczD6b8mWvsm@dpg-d1ggp1nfte5s738kcpkg-a.oregon-postgres.render.com:5432/s3gymdb',
     SECRET_KEY='siva-secret',
     MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
+
 
 db = SQLAlchemy(app)
 UPLOAD_FOLDER = 'static/uploads'

@@ -2,18 +2,23 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
+from sqlalchemy import or_
+from dotenv import load_dotenv
 import pandas as pd
 import os
 
+# Load environment variables from .env
+load_dotenv()
+
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI='postgresql://s3gymdb_user:CjToQXSl6EAp7kY7TALHiczD6b8mWvsm@dpg-d1ggp1nfte5s738kcpkg-a.oregon-postgres.render.com:5432/s3gymdb',
-    SECRET_KEY='siva-secret',
+    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
+    SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
     MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
 
-
 db = SQLAlchemy(app)
+
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -65,7 +70,6 @@ def add_client():
             join_date_str = request.form.get('join_date')
             payment_status = request.form.get('payment_status')
 
-            # Required fields check
             if not all([name, contact, gender, client_type, join_date_str, payment_status]):
                 flash("All required fields (name, contact, gender, type, join date, status) must be filled.", 'danger')
                 return redirect(url_for('add_client'))
@@ -77,20 +81,16 @@ def add_client():
             join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
             due = join_date + timedelta(days=30)
 
-            # Optional fields
             goal = request.form.get('goal')
             weight_str = request.form.get('weight')
-            weight = None
-            if weight_str:
-                weight = float(weight_str)
-                if weight < 50 or weight > 110:
-                    flash("Weight must be between 50–110 kg.", 'danger')
-                    return redirect(url_for('add_client'))
+            weight = float(weight_str) if weight_str else None
+            if weight and (weight < 50 or weight > 110):
+                flash("Weight must be between 50–110 kg.", 'danger')
+                return redirect(url_for('add_client'))
 
             fees_str = request.form.get('fees')
             fees = int(fees_str) if fees_str and fees_str.isdigit() else 0
 
-            # Handle file upload
             file = request.files.get('profile_image')
             fname = None
             if file and allowed_file(file.filename):
@@ -111,7 +111,6 @@ def add_client():
                 profile_image=fname,
                 last_updated=datetime.now()
             )
-
             db.session.add(c)
             db.session.commit()
             flash("Client added!", 'success')
@@ -167,23 +166,18 @@ def delete_client(client_id):
     flash("Client deleted.", 'info')
     return redirect(url_for('index'))
 
-from sqlalchemy import or_
-
 @app.route('/due')
 def due_clients():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
-    
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
-
     due = Client.query.filter(
         or_(
             Client.payment_due_date < today,
             Client.payment_due_date <= next_3_days
         )
     ).all()
-
     return render_template('due_clients.html', clients=due)
 
 @app.route('/master')
@@ -236,6 +230,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 

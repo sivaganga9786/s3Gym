@@ -1,25 +1,4 @@
-
-
-
-# from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
-# from flask_sqlalchemy import SQLAlchemy
-# from datetime import datetime, timedelta
-# from werkzeug.utils import secure_filename
-# import pandas as pd
-# import os
-
-# app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gym.db'
-# app.config['SECRET_KEY'] = 'siva-secret'
-
-# UPLOAD_FOLDER = 'static/uploads'
-# ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# db = SQLAlchemy(app)
-
-# # ✅ File type validationfrom flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename

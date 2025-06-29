@@ -94,11 +94,11 @@
             <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="28" height="28" class="bounce-hover">
             </a>
 
-                {% if session.get('admin_logged_in') %}
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
-        {% endif %}
+            {% if session.get('admin_logged_in') %}
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
+            {% endif %}
     </div>
 </nav>
 
@@ -134,16 +134,17 @@
             <p>Expert Trainers</p>
         </div>
     </div>
-
-    <!-- Gallery -->
-    <h3 class="text-center mt-4">Our Gym & Equipment</h3>
-    <div class="scroll-gallery">
-        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
-        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
-        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
-        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
-        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+    <!-- YouTube Promo Video (Compact) -->
+        <h3 class="mt-5">🎥 Promo Video</h3>
+        <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
+            <div style="position:relative; width:100%; padding-bottom:56.25%;">
+                <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                        allowfullscreen title="S3 Gym Promo">
+                </iframe>
+            </div>
     </div>
+
 
     <!-- Testimonials -->
     <h3 class="mt-5">💬 What Our Clients Say</h3>
@@ -161,18 +162,15 @@
             </div>
         </div>
     </div>
-
-        <!-- YouTube Promo Video (Compact) -->
-        <h3 class="mt-5">🎥 Promo Video</h3>
-        <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
-            <div style="position:relative; width:100%; padding-bottom:56.25%;">
-                <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                        allowfullscreen title="S3 Gym Promo">
-                </iframe>
-            </div>
-        </div>
-
+    <!-- Gallery -->
+    <h3 class="text-center mt-4">Our Gym & Equipment</h3>
+    <div class="scroll-gallery">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+    </div>
 </div>
 
 <footer>

@@ -8,6 +8,7 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gym.db'
 app.config['SECRET_KEY'] = 'siva-secret'
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB max upload size
 
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -76,47 +77,47 @@ def index():
 
     return render_template("clients.html", clients=clients, upcoming_due=upcoming_due, query=query)
 
-# ✅ Add client
+# ✅ Add client (updated)
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if 'admin_logged_in' not in session:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        name = request.form['name']
-        contact = request.form['contact']
-        goal = request.form['goal']
-        weight = float(request.form['weight'])
-        payment_status = request.form['payment_status']
-        join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
-
-        # ✅ Auto-calculate due date if not provided
-        due_date_str = request.form.get('payment_due_date')
-        if due_date_str:
-            payment_due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
-        else:
+        try:
+            name = request.form['name']
+            contact = request.form['contact']
+            goal = request.form['goal']
+            weight = float(request.form['weight'])
+            payment_status = request.form['payment_status']
+            join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
             payment_due_date = join_date + timedelta(days=30)
 
-        file = request.files.get('profile_image')
-        filename = None
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file = request.files.get('profile_image')
+            filename = None
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        new_client = Client(
-            name=name,
-            contact=contact,
-            goal=goal,
-            weight=weight,
-            payment_status=payment_status,
-            join_date=join_date,
-            payment_due_date=payment_due_date,
-            profile_image=filename,
-            last_updated=datetime.now()
-        )
-        db.session.add(new_client)
-        db.session.commit()
-        return redirect(url_for('index'))
+            new_client = Client(
+                name=name,
+                contact=contact,
+                goal=goal,
+                weight=weight,
+                payment_status=payment_status,
+                join_date=join_date,
+                payment_due_date=payment_due_date,
+                profile_image=filename,
+                last_updated=datetime.now()
+            )
+            db.session.add(new_client)
+            db.session.commit()
+            flash("✅ Client added successfully!", "success")
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            flash(f"⚠️ Failed to add client: {str(e)}", "danger")
+            return redirect(url_for('add_client'))
 
     return render_template('add_client.html')
 
@@ -174,10 +175,12 @@ def due_clients():
         return redirect(url_for('login'))
 
     today = datetime.today().date()
+    three_day_window = today + timedelta(days=2)
+
     due_clients = Client.query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date >= today,
-        Client.payment_due_date <= today + timedelta(days=2)
+        Client.payment_due_date <= three_day_window
     ).all()
 
     return render_template('due_clients.html', clients=due_clients)
@@ -191,7 +194,7 @@ def master_list():
     all_clients = Client.query.order_by(Client.join_date.desc()).all()
     return render_template('master_list.html', clients=all_clients)
 
-# ✅ Excel backup
+# ✅ Excel export
 @app.route('/download_excel')
 def download_excel():
     if 'admin_logged_in' not in session:
@@ -217,11 +220,12 @@ def download_excel():
 
     return send_file(filepath, as_attachment=True)
 
-# ✅ Run the Flask app
+# ✅ Run
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 # def allowed_file(filename):
 #     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

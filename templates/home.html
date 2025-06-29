@@ -47,20 +47,38 @@
 </head>
 <body class="p-4">
 
-<!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-    <a class="navbar-brand" href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="40">
-        <span class="ms-2">S3 Gym</span>
+  <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="40">
+    <span class="ms-2">S3 Gym</span>
+  </a>
+
+  <div class="ms-auto d-flex align-items-center gap-3">
+
+    <!-- Social Icons with Tooltips -->
+    <a href="tel:+919398367605" class="text-white" title="Call">
+      📞
     </a>
-    <div class="ms-auto">
-        {% if session.get('admin_logged_in') %}
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
-        {% endif %}
-    </div>
+    <a href="https://wa.me/919398367605" target="_blank" class="text-white" title="WhatsApp">
+      💬
+    </a>
+    <a href="https://www.instagram.com/s3_gym_official" target="_blank" class="text-white" title="Instagram">
+      📸
+    </a>
+    <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" target="_blank" class="text-white" title="Location">
+      📍
+    </a>
+
+
+    <!-- Login/Logout Button -->
+    {% if session.get('admin_logged_in') %}
+      <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm ms-2">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm ms-2">Login</a>
+    {% endif %}
+  </div>
 </nav>
+
 
 <div class="container text-center">
     <h1 class="my-3">🏋️ Welcome to S3 Gym</h1>
@@ -135,14 +153,6 @@
 
 <footer>
     <div class="container">
-        <p><strong>Contact:</strong> <a href="tel:+919398367605">+91 9398367605</a></p>
-        <p>
-            <a href="https://wa.me/919398367605" target="_blank">WhatsApp</a> |
-            <a href="https://www.instagram.com/s3_gym_official?igsh=ODFrbDRubng4eGg1" target="_blank">Instagram</a>
-        </p>
-        <p>
-            <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" target="_blank">📍 Find us on Google Maps</a>
-        </p>
         <p>&copy; {{ current_year }} Gym Management App. All rights reserved.</p>
     </div>
 </footer>

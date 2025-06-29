@@ -30,17 +30,20 @@
               <input name="contact" class="form-control" required>
             </div>
           </div>
+
           <div class="mb-3">
             <label>Goal</label>
             <select name="goal" class="form-select" required>
-                <option value="">Select</option>
-                <option>Strength and Cardio</option>
-                <option>Strength</option>
-                <option>Cardio</option>
-                <option>Weight loss</option>    
-                <option>Weight gain</option>
-                <option>Muscle gain</option>
+              <option value="">Select</option>
+              <option>Strength and Cardio</option>
+              <option>Strength</option>
+              <option>Cardio</option>
+              <option>Weight loss</option>
+              <option>Weight gain</option>
+              <option>Muscle gain</option>
+            </select>
           </div>
+
           <div class="row">
             <div class="col-md-4 mb-3">
               <label>Weight (kg)</label>
@@ -63,10 +66,12 @@
               </select>
             </div>
           </div>
+
           <div class="mb-3">
             <label>Monthly Fee (₹)</label>
             <input name="fees" id="fees" readonly class="form-control">
           </div>
+
           <div class="row">
             <div class="col-md-6 mb-3">
               <label>Join Date</label>
@@ -78,6 +83,7 @@
               <input name="payment_due_date" id="payment_due_date" type="date" class="form-control" readonly required>
             </div>
           </div>
+
           <div class="mb-3">
             <label>Payment Status</label>
             <select name="payment_status" class="form-select" required>
@@ -92,6 +98,7 @@
             <input name="profile_image" type="file" accept="image/*" class="form-control" onchange="preview(this)">
             <img id="imagePreview" class="preview-img">
           </div>
+
           <div class="d-flex justify-content-between">
             <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
             <button class="btn btn-primary">Submit</button>
@@ -103,6 +110,7 @@
       <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Back Home</a>
     </div>
   </div>
+
   <script>
     function setDue() {
       const jd = document.getElementById('join_date').value;
@@ -112,10 +120,12 @@
         document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
       }
     }
+
     function calcFee() {
       const t = document.getElementById('clientType').value;
       document.getElementById('fees').value = t === 'student' ? 800 : t === 'general' ? 1000 : '';
     }
+
     function preview(i) {
       if (i.files && i.files[0]) {
         const fr = new FileReader();
@@ -130,6 +140,7 @@
   </script>
 </body>
 </html>
+
 
 
 

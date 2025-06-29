@@ -133,13 +133,18 @@ def delete_client(client_id):
 def due_clients():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
+
     today = datetime.today().date()
+    three_days_ahead = today + timedelta(days=3)
+
     due = Client.query.filter(
-        Client.payment_status=='unpaid',
-        Client.payment_due_date>=today,
-        Client.payment_due_date<=today+timedelta(days=2)
-    ).all()
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date <= three_days_ahead  # due today, next 3 days, or already overdue
+    ).order_by(Client.payment_due_date.asc()).all()
+
     return render_template('due_clients.html', clients=due)
+
+
 
 @app.route('/master')
 def master_list():

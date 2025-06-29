@@ -27,17 +27,56 @@ class Client(db.Model):
     contact = db.Column(db.String(20))
     goal = db.Column(db.String(200))
     weight = db.Column(db.Float)
-    gender = db.Column(db.String(10))  # New
-    client_type = db.Column(db.String(10))  # New
-    fees = db.Column(db.Float)  # New
     payment_status = db.Column(db.String(20))
     join_date = db.Column(db.Date, default=datetime.utcnow)
     payment_due_date = db.Column(db.Date, default=datetime.utcnow)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(120), nullable=True)
 
-# ... other routes remain same ...
+# ✅ Home
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
+# ✅ Login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'admin' and password == 'admin123':
+            session['admin_logged_in'] = True
+            return redirect(url_for('home'))
+        flash('Invalid credentials', 'danger')
+    return render_template('login.html')
+
+# ✅ Logout
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    flash('Logged out successfully.', 'info')
+    return redirect(url_for('login'))
+
+# ✅ Index (main clients list)
+@app.route('/')
+def index():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    query = request.args.get('search', '')
+    today = datetime.today().date()
+
+    clients = Client.query.filter(Client.name.ilike(f"%{query}%")).all() if query else Client.query.all()
+
+    upcoming_due = Client.query.filter(
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= today + timedelta(days=2)
+    ).all()
+
+    return render_template("clients.html", clients=clients, upcoming_due=upcoming_due, query=query)
+
+# ✅ Add client
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if 'admin_logged_in' not in session:
@@ -48,12 +87,15 @@ def add_client():
         contact = request.form['contact']
         goal = request.form['goal']
         weight = float(request.form['weight'])
-        gender = request.form['gender']
-        client_type = request.form['client_type']
-        fees = float(request.form['fees'])
         payment_status = request.form['payment_status']
         join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
-        payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
+
+        # ✅ Auto-calculate due date if not provided
+        due_date_str = request.form.get('payment_due_date')
+        if due_date_str:
+            payment_due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
+        else:
+            payment_due_date = join_date + timedelta(days=30)
 
         file = request.files.get('profile_image')
         filename = None
@@ -66,9 +108,6 @@ def add_client():
             contact=contact,
             goal=goal,
             weight=weight,
-            gender=gender,
-            client_type=client_type,
-            fees=fees,
             payment_status=payment_status,
             join_date=join_date,
             payment_due_date=payment_due_date,
@@ -80,6 +119,109 @@ def add_client():
         return redirect(url_for('index'))
 
     return render_template('add_client.html')
+
+# ✅ Edit client
+@app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
+def edit_client(client_id):
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    client = Client.query.get_or_404(client_id)
+    if request.method == 'POST':
+        client.name = request.form['name']
+        client.contact = request.form['contact']
+        client.goal = request.form['goal']
+        client.weight = float(request.form['weight'])
+        client.payment_status = request.form['payment_status']
+
+        try:
+            client.join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
+        except:
+            pass
+
+        try:
+            client.payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
+        except:
+            pass
+
+        file = request.files.get('profile_image')
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            client.profile_image = filename
+
+        client.last_updated = datetime.now()
+        db.session.commit()
+        return redirect(url_for('index'))
+
+    return render_template('edit_client.html', client=client)
+
+# ✅ Delete client
+@app.route('/delete/<int:client_id>', methods=['POST'])
+def delete_client(client_id):
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    client = Client.query.get_or_404(client_id)
+    db.session.delete(client)
+    db.session.commit()
+    return redirect(url_for('index'))
+
+# ✅ Due clients
+@app.route('/due')
+def due_clients():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    today = datetime.today().date()
+    due_clients = Client.query.filter(
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= today + timedelta(days=2)
+    ).all()
+
+    return render_template('due_clients.html', clients=due_clients)
+
+# ✅ Master list
+@app.route('/master')
+def master_list():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    all_clients = Client.query.order_by(Client.join_date.desc()).all()
+    return render_template('master_list.html', clients=all_clients)
+
+# ✅ Excel backup
+@app.route('/download_excel')
+def download_excel():
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('login'))
+
+    clients = Client.query.all()
+    data = [{
+        "ID": c.id,
+        "Name": c.name,
+        "Contact": c.contact,
+        "Goal": c.goal,
+        "Weight": c.weight,
+        "Payment Status": c.payment_status,
+        "Join Date": c.join_date.strftime('%Y-%m-%d'),
+        "Due Date": c.payment_due_date.strftime('%Y-%m-%d'),
+        "Last Updated": c.last_updated.strftime('%Y-%m-%d %H:%M:%S'),
+    } for c in clients]
+
+    df = pd.DataFrame(data)
+    filepath = "static/backups/clients_backup.xlsx"
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    df.to_excel(filepath, index=False)
+
+    return send_file(filepath, as_attachment=True)
+
+# ✅ Run the Flask app
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    app.run(host='0.0.0.0', port=10000)
 
 # def allowed_file(filename):
 #     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

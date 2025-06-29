@@ -129,20 +129,25 @@ def delete_client(client_id):
     flash("Client deleted.", 'info')
     return redirect(url_for('index'))
 
+from sqlalchemy import or_
+
 @app.route('/due')
 def due_clients():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
-
+    
     today = datetime.today().date()
-    three_days_ahead = today + timedelta(days=3)
+    next_3_days = today + timedelta(days=3)
 
     due = Client.query.filter(
-        Client.payment_status == 'unpaid',
-        Client.payment_due_date <= three_days_ahead  # due today, next 3 days, or already overdue
-    ).order_by(Client.payment_due_date.asc()).all()
+        or_(
+            Client.payment_due_date < today,  # Overdue
+            Client.payment_due_date <= next_3_days  # Upcoming in next 3 days
+        )
+    ).all()
 
     return render_template('due_clients.html', clients=due)
+
 
 
 

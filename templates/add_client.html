@@ -4,58 +4,131 @@
     <meta charset="UTF-8">
     <title>Add Client</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .preview-img {
+            max-height: 100px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            display: none;
+        }
+    </style>
 </head>
-<body class="p-4">
+<body class="bg-light p-4">
     <div class="container">
-        <h2 class="mb-4">Add New Client</h2>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title mb-4 text-center">➕ Add New Client</h2>
 
-        <!-- ✅ enctype added for file uploads -->
-        <form method="POST" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label>Name</label>
-                <input type="text" name="name" class="form-control" required />
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label>Name</label>
+                            <input type="text" name="name" class="form-control" required />
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label>Contact</label>
+                            <input type="text" name="contact" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Fitness Goal</label>
+                        <input type="text" name="goal" class="form-control" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col-md-4">
+                            <label>Weight (kg)</label>
+                            <input type="number" name="weight" step="0.1" class="form-control" required />
+                        </div>
+                        <div class="mb-3 col-md-4">
+                            <label>Gender</label>
+                            <select name="gender" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-4">
+                            <label>Client Type</label>
+                            <select name="client_type" class="form-select" onchange="calculateFee()" id="clientType" required>
+                                <option value="">Select</option>
+                                <option value="student">Student</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Monthly Fee (₹)</label>
+                        <input type="number" name="fees" id="fees" class="form-control" readonly />
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label>Join Date</label>
+                            <input type="date" name="join_date" id="join_date" class="form-control" required onchange="setDueDate()" />
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label>Payment Due Date</label>
+                            <input type="date" name="payment_due_date" id="payment_due_date" class="form-control" required readonly />
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label>Profile Image</label>
+                        <input type="file" name="profile_image" class="form-control" accept="image/*" onchange="previewImage(event)">
+                        <img id="imagePreview" class="preview-img" />
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back</a>
+                        <button type="submit" class="btn btn-primary">✅ Submit</button>
+                    </div>
+                </form>
             </div>
-            <div class="mb-3">
-                <label>Contact</label>
-                <input type="text" name="contact" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Fitness Goal</label>
-                <input type="text" name="goal" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Weight (kg)</label>
-                <input type="number" name="weight" step="0.1" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Payment Status</label>
-                <select name="payment_status" class="form-control" required>
-                    <option value="paid">Paid</option>
-                    <option value="unpaid">Unpaid</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label>Join Date</label>
-                <input type="date" name="join_date" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Payment Due Date</label>
-                <input type="date" name="payment_due_date" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label>Profile Image</label>
-                <input type="file" name="profile_image" class="form-control" accept="image/*" />
-            </div>
-            <div class="mt-4">
-                <button type="submit" class="btn btn-primary">➕ Add Client</button>
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back</a>
-            </div>
-        </form>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">🏠 Back to Home</a>
+        </div>
     </div>
 
-    <div class="mt-4 text-center">
-        <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
-    </div>
+    <script>
+        function setDueDate() {
+            const joinDateInput = document.getElementById("join_date");
+            const dueDateInput = document.getElementById("payment_due_date");
+
+            const joinDate = new Date(joinDateInput.value);
+            if (!isNaN(joinDate.getTime())) {
+                joinDate.setDate(joinDate.getDate() + 30);
+                const dueDate = joinDate.toISOString().split('T')[0];
+                dueDateInput.value = dueDate;
+            }
+        }
+
+        function calculateFee() {
+            const type = document.getElementById('clientType').value;
+            const feeInput = document.getElementById('fees');
+            feeInput.value = type === 'student' ? 500 : type === 'general' ? 800 : '';
+        }
+
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('imagePreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+
 </body>
 </html>
 

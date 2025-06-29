@@ -74,7 +74,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
     <a class="navbar-brand" href="{{ url_for('home') }}">
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="40">
-        <span class="ms-2">S3 Gym</span>
     </a>
 
     <!-- Right side (Logout + Contact Icons) -->
@@ -104,8 +103,14 @@
 
 
 
+<div class="equipment-gifs d-flex gap-3 overflow-auto py-3">
+    <img src="{{ url_for('static', filename='gifs/treadmill.gif') }}" alt="Treadmill Animation" class="rounded shadow-sm" style="height:120px;">
+    <img src="{{ url_for('static', filename='gifs/exercise_bike.gif') }}" alt="Exercise Bike Animation" class="rounded shadow-sm" style="height:120px;">
+    <img src="{{ url_for('static', filename='gifs/dumbbell.gif') }}" alt="Dumbbell Animation" class="rounded shadow-sm" style="height:120px;">
+    <img src="{{ url_for('static', filename='gifs/squat.gif') }}" alt="Squat Animation" class="rounded shadow-sm" style="height:120px;">
+</div>
+
 <div class="container text-center">
-    <h1 class="my-3">🏋️ Welcome to S3 Gym</h1>
 
     <div class="offers-marquee">
         <marquee behavior="scroll" direction="left" scrollamount="5">

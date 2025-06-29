@@ -36,13 +36,22 @@
         .contact-icons img:hover {
             animation: bounce 0.4s ease;
         }
+          .bounce-hover {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .bounce-hover:hover {
+            animation: bounce 0.6s infinite;
+        }
 
         @keyframes bounce {
-            0%   { transform: scale(1); }
-            30%  { transform: scale(1.2); }
-            60%  { transform: scale(0.95); }
-            100% { transform: scale(1); }
-   }
+            0%, 100% {
+            transform: translateY(0);
+            }
+            50% {
+            transform: translateY(-6px);
+            }
+        }
         footer {
             margin-top: 40px;
             padding: 20px 0;
@@ -70,24 +79,26 @@
 
     <!-- Right side (Logout + Contact Icons) -->
     <div class="ms-auto d-flex align-items-center gap-3">
-        {% if session.get('admin_logged_in') %}
+
+
+            <a href="tel:+919398367605" title="Call">
+            <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="28" height="28" class="bounce-hover">
+            </a>
+            <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
+            <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="28" height="28" class="bounce-hover">
+            </a>
+            <a href="https://www.instagram.com/s3_gym_official" title="Instagram" target="_blank">
+            <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="28" height="28" class="bounce-hover">
+            </a>
+            <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
+            <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="28" height="28" class="bounce-hover">
+            </a>
+
+                {% if session.get('admin_logged_in') %}
             <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
         {% else %}
             <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
         {% endif %}
-
-        <a href="tel:+919398367605" title="Call">
-            <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="28" height="28">
-        </a>
-        <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
-            <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="28" height="28">
-        </a>
-        <a href="https://www.instagram.com/s3_gym_official" title="Instagram" target="_blank">
-            <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="28" height="28">
-        </a>
-        <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
-            <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="28" height="28">
-        </a>
     </div>
 </nav>
 

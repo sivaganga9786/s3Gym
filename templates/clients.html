@@ -1,32 +1,78 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><title>Clients</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body class="bg-light p-4">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clients</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
 <div class="container">
-  <div class="d-flex justify-content-between mb-4"><h2>📋 Clients</h2><a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a></div>
+  <div class="d-flex justify-content-between mb-4">
+    <h2>📋 Clients</h2>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+  </div>
+
   <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
     <input name="search" value="{{ query }}" placeholder="Search by name" class="form-control">
     <button class="btn btn-primary">Search</button>
   </form>
+
   <div class="table-responsive">
     <table class="table table-hover align-middle">
       <thead class="table-light">
-        <tr><th>Name</th><th>Contact</th><th>Goal</th><th>Weight</th><th>Gender</th><th>Type</th><th>Fees</th><th>Status</th><th>Join</th><th>Due</th><th>Image</th><th>Actions</th></tr>
-      </thead>
-      <tbody>{% for c in clients %}
-        <tr class="{{ 'table-warning' if c in upcoming_due else '' }}">
-          <td>{{ c.name }}</td><td>{{ c.contact }}</td><td>{{ c.goal }}</td><td>{{ c.weight }} kg</td>
-          <td>{{ c.gender }}</td><td>{{ c.client_type.capitalize() }}</td><td>₹{{ c.fees }}</td><td>{{ c.payment_status }}</td>
-          <td>{{ c.join_date }}</td><td>{{ c.payment_due_date }}</td>
-          <td>{% if c.profile_image %}<img src="{{ url_for('static', filename='uploads/'+c.profile_image) }}" style="height:40px;border-radius:5px">{% else %}N/A{% endif %}</td>
-          <td><a href="{{ url_for('edit_client', client_id=c.id) }}" class="btn btn-sm btn-info">Edit</a>
-          <form action="{{ url_for('delete_client', client_id=c.id) }}" method="POST" class="d-inline"><button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Del</button></form></td>
+        <tr>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Goal</th>
+          <th>Weight</th>
+          <th>Gender</th>
+          <th>Type</th>
+          <th>Fees</th>
+          <th>Status</th>
+          <th>Join</th>
+          <th>Due</th>
+          <th>Image</th>
+          <th>Actions</th>
         </tr>
-      {% endfor %}</tbody>
+      </thead>
+      <tbody>
+        {% for c in clients %}
+        <tr class="{{ 'table-warning' if c in upcoming_due else '' }}">
+          <td>{{ c.name }}</td>
+          <td>{{ c.contact }}</td>
+          <td>{{ c.goal }}</td>
+          <td>{{ c.weight }} kg</td>
+          <td>{{ c.gender }}</td>
+          <td>{{ c.client_type.capitalize() }}</td>
+          <td>₹{{ c.fees }}</td>
+          <td>{{ c.payment_status }}</td>
+          <td>{{ c.join_date }}</td>
+          <td>{{ c.payment_due_date }}</td>
+          <td>
+            {% if c.profile_image %}
+              <img src="{{ url_for('static', filename='uploads/' + c.profile_image) }}" style="height:40px;border-radius:5px">
+            {% else %}
+              N/A
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('edit_client', client_id=c.id) }}" class="btn btn-sm btn-info">Edit</a>
+            <form action="{{ url_for('delete_client', client_id=c.id) }}" method="POST" class="d-inline">
+              <button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
+
   <div class="d-flex justify-content-center my-3">
     <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Home</a>
     <a href="{{ url_for('download_excel') }}" class="btn btn-outline-info">Download Excel</a>
   </div>
-</div></body></html>
+</div>
+</body>
+</html>
+
 

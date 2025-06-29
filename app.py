@@ -42,8 +42,7 @@ def index():
         return redirect(url_for('login'))
     query = request.args.get('search', '')
     today = datetime.today().date()
-    clients = (Client.query.filter(Client.name.ilike(f"%{query}%")).all()
-               if query else Client.query.all())
+    clients = Client.query.filter(Client.name.ilike(f"%{query}%")).all() if query else Client.query.all()
     upcoming_due = Client.query.filter(
         Client.payment_status=='unpaid',
         Client.payment_due_date >= today,

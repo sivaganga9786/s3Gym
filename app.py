@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI='sqlite:///gym.db',
     SECRET_KEY='siva-secret',
-    MAX_CONTENT_LENGTH=2 * 1024 * 1024
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
 
 db = SQLAlchemy(app)
@@ -58,6 +58,10 @@ def add_client():
         try:
             name = request.form['name']
             contact = request.form['contact']
+            if not contact.isdigit() or len(contact) != 10:
+                flash("Contact number must be exactly 10 digits", 'danger')
+                return redirect(url_for('add_client'))
+
             goal = request.form['goal']
             weight = float(request.form['weight'])
 

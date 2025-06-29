@@ -11,7 +11,6 @@
             padding: 10px;
             font-weight: bold;
         }
-  
         .scroll-gallery {
             display: flex;
             overflow-x: auto;
@@ -22,7 +21,13 @@
             height: 120px;
             border-radius: 8px;
         }
-
+        .testimonial-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
         footer {
             margin-top: 40px;
             padding: 20px 0;
@@ -43,62 +48,116 @@
 <body class="p-4">
 
 <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-        <a class="navbar-brand" href="{{ url_for('home') }}">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="{{ url_for('home') }}">
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="40">
         <span class="ms-2">S3 Gym</span>
-        </a>
-        <div class="ms-auto">
+    </a>
+    <div class="ms-auto">
         {% if session.get('admin_logged_in') %}
             <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
         {% else %}
             <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
         {% endif %}
+    </div>
+</nav>
+
+<div class="container text-center">
+    <h1 class="my-3">🏋️ Welcome to S3 Gym</h1>
+
+    <div class="offers-marquee">
+        <marquee behavior="scroll" direction="left" scrollamount="5">
+            🎉 Summer Offer: Get 20% Off! | 💪 Join Now & Get 1 Month Free! | 🏃‍♂️ Early Bird Discount Available!
+        </marquee>
+    </div>
+
+    <div class="my-4">
+        <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
+        <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
+        <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
+        <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
+    </div>
+
+    <hr>
+
+    <!-- Animated Stats -->
+    <h3 class="mt-5">🏆 Our Achievements</h3>
+    <div class="row text-center">
+        <div class="col">
+            <h2 id="members">0+</h2>
+            <p>Members</p>
         </div>
-    </nav>
-
-    <div class="container text-center">
-        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
-        <h1 class="my-3">🏋️ Welcome to S3 Gym</h1>
-
-        <div class="offers-marquee">
-            <marquee behavior="scroll" direction="left" scrollamount="5">
-                🎉 Summer Offer: Get 20% Off! | 💪 Join Now & Get 1 Month Free! | 🏃‍♂️ Early Bird Discount Available!
-            </marquee>
-        </div>
-
-        <div class="my-4">
-            <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
-            <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
-            <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
-            <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
-        </div>
-
-        <hr>
-
-        <h3 class="text-center mt-4">Our Gym & Equipment</h3>
-        <div class="scroll-gallery">
-            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
-            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
-            <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
-            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
-            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+        <div class="col">
+            <h2 id="trainers">0</h2>
+            <p>Expert Trainers</p>
         </div>
     </div>
 
-    <footer>
-        <div class="container">
-            <p><strong>Contact:</strong> <a href="tel:+919876543210">+91 9398367605</a></p>
-            <p>
-                <a href="https://wa.me/919398367605" target="_blank">WhatsApp</a> |
-                <a href="https://www.instagram.com/s3_gym_official?igsh=ODFrbDRubng4eGg1" target="_blank">Instagram</a> |
-            </p>
-            <p>
-                <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" target="_blank">📍 Find us on Google Maps</a>
-            </p>
-            <p>&copy; {{ current_year }} Gym Management App. All rights reserved.</p>
+    <!-- Gallery -->
+    <h3 class="text-center mt-4">Our Gym & Equipment</h3>
+    <div class="scroll-gallery">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+    </div>
+
+    <!-- Testimonials -->
+    <h3 class="mt-5">💬 What Our Clients Say</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="testimonial-card">
+                <p>"Great trainers and equipment. Love the atmosphere!"</p>
+                <small>- Rahul, Member</small>
+            </div>
         </div>
-    </footer>
+        <div class="col-md-4">
+            <div class="testimonial-card">
+                <p>"S3 Gym helped me stay consistent. Highly recommend!"</p>
+                <small>- Priya, Member</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube Promo Video -->
+    <h3 class="mt-5">🎥 Promo Video</h3>
+    <div class="ratio ratio-16x9 mb-4">
+        <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" title="S3 Gym Promo" allowfullscreen></iframe>
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p><strong>Contact:</strong> <a href="tel:+919398367605">+91 9398367605</a></p>
+        <p>
+            <a href="https://wa.me/919398367605" target="_blank">WhatsApp</a> |
+            <a href="https://www.instagram.com/s3_gym_official?igsh=ODFrbDRubng4eGg1" target="_blank">Instagram</a>
+        </p>
+        <p>
+            <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" target="_blank">📍 Find us on Google Maps</a>
+        </p>
+        <p>&copy; {{ current_year }} Gym Management App. All rights reserved.</p>
+    </div>
+</footer>
+
+<script>
+    function animateValue(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        let current = start;
+        const range = end - start;
+        const stepTime = Math.abs(Math.floor(duration / range));
+        const timer = setInterval(function() {
+            current += 1;
+            obj.textContent = current + "+";
+            if (current >= end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+    animateValue("members", 0, 120, 1000);
+    animateValue("trainers", 0, 6, 1000);
+</script>
 
 </body>
 </html>

@@ -50,44 +50,62 @@ def index():
     ).all()
     return render_template('clients.html', clients=clients, upcoming_due=upcoming_due, query=query)
 
-@app.route('/add', methods=['GET','POST'])
+@app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
-    if request.method=='POST':
+    if request.method == 'POST':
         try:
             name = request.form['name']
             contact = request.form['contact']
             goal = request.form['goal']
             weight = float(request.form['weight'])
+
             if weight < 50 or weight > 110:
                 flash("Weight must be 50–110 kg", 'danger')
                 return redirect(url_for('add_client'))
+
             gender = request.form['gender']
             client_type = request.form['client_type']
             fees = int(request.form['fees'])
             payment_status = request.form['payment_status']
             join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
             due = join_date + timedelta(days=30)
+
             file = request.files.get('profile_image')
             fname = None
-            if file and allowed_file(file.filename):
+            if file and file.filename and allowed_file(file.filename):
                 fname = secure_filename(file.filename)
                 file.save(os.path.join(UPLOAD_FOLDER, fname))
+
             c = Client(
-                name=name, contact=contact, goal=goal, weight=weight,
-                gender=gender, client_type=client_type, fees=fees,
-                payment_status=payment_status, join_date=join_date,
-                payment_due_date=due, profile_image=fname,
+                name=name,
+                contact=contact,
+                goal=goal,
+                weight=weight,
+                gender=gender,
+                client_type=client_type,
+                fees=fees,
+                payment_status=payment_status,
+                join_date=join_date,
+                payment_due_date=due,
+                profile_image=fname,
                 last_updated=datetime.now()
             )
-            db.session.add(c); db.session.commit()
+
+            db.session.add(c)
+            db.session.commit()
             flash("Client added!", 'success')
             return redirect(url_for('index'))
+
         except Exception as e:
+            import traceback
+            traceback.print_exc()  # Log error in terminal
             flash(f"Error: {e}", 'danger')
             return redirect(url_for('add_client'))
+
     return render_template('add_client.html')
+
 
 @app.route('/edit/<int:client_id>', methods=['GET','POST'])
 def edit_client(client_id):

@@ -33,14 +33,12 @@
 
           <div class="mb-3">
             <label>Goal</label>
-            <select name="goal" class="form-select" required>
+            <select name="goal" class="form-select" id="goalSelect" onchange="calcFee()" required>
               <option value="">Select</option>
-              <option>Strength and Cardio</option>
-              <option>Strength</option>
-              <option>Cardio</option>
-              <option>Weight loss</option>
-              <option>Weight gain</option>
-              <option>Muscle gain</option>
+              <option value="strength_cardio">Strength and Cardio</option>
+              <option value="personal_training">Personal Training</option>
+              <option value="Fitness_Training">Fitness Training </option>
+              <option value="strength">Strength</option>
             </select>
           </div>
 
@@ -122,8 +120,20 @@
     }
 
     function calcFee() {
-      const t = document.getElementById('clientType').value;
-      document.getElementById('fees').value = t === 'student' ? 800 : t === 'general' ? 1000 : '';
+      const type = document.getElementById('clientType').value;
+      const goal = document.getElementById('goalSelect').value;
+
+      let fee = 0;
+
+      if (goal === "personal_training") {
+        fee = 5000;
+      } else if (goal === "strength_cardio") {
+        fee = type === "General" ? 1100 : 1300;
+      } else {
+        fee = type === "Student" ? 800 : 1000;
+      }
+
+      document.getElementById('fees').value = fee;
     }
 
     function preview(i) {
@@ -140,6 +150,7 @@
   </script>
 </body>
 </html>
+
 
 
 

@@ -128,29 +128,36 @@
       if (goal === "personal_training") {
         fee = 5000;
       } else if (goal === "strength_cardio") {
-        fee = type === "General" ? 1100 : 1300;
+        if (type === "student") {
+          fee = 1100;
+        } else if (type === "general") {
+          fee = 1300;
+        }
       } else {
-        fee = type === "Student" ? 800 : 1000;
+        if (type === "student") {
+          fee = 800;
+        } else if (type === "general") {
+          fee = 1000;
+        }
       }
 
       document.getElementById('fees').value = fee;
     }
 
-    function preview(i) {
-      if (i.files && i.files[0]) {
-        const fr = new FileReader();
-        fr.onload = e => {
+    function preview(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
           const img = document.getElementById('imagePreview');
           img.src = e.target.result;
           img.style.display = 'block';
         };
-        fr.readAsDataURL(i.files[0]);
+        reader.readAsDataURL(input.files[0]);
       }
     }
   </script>
 </body>
 </html>
-
 
 
 

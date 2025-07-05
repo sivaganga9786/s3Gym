@@ -28,13 +28,6 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
-    .contact-icons img {
-      transition: transform 0.2s ease;
-      cursor: pointer;
-    }
-    .contact-icons img:hover {
-      animation: bounce 0.4s ease;
-    }
     .bounce-hover {
       transition: transform 0.2s ease-in-out;
     }
@@ -64,6 +57,7 @@
 </head>
 <body class="p-4">
 
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
   <a class="navbar-brand" href="{{ url_for('home') }}">
     <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
@@ -71,18 +65,20 @@
 
   <div class="ms-auto d-flex align-items-center gap-3">
     <div class="d-flex align-items-center gap-3 me-4">
-      <a href="tel:+919398367605" title="Call">
-        <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="35" height="35" class="bounce-hover">
-      </a>
-      <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
-        <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="35" height="35" class="bounce-hover">
-      </a>
-      <a href="https://www.instagram.com/s3_gym_official" title="Instagram" target="_blank">
-        <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="35" height="35" class="bounce-hover">
-      </a>
-      <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
-        <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="35" height="35" class="bounce-hover">
-      </a>
+      {% if not session.get('admin_logged_in') %}
+        <a href="tel:+919398367605" title="Call">
+          <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="35" height="35" class="bounce-hover">
+        </a>
+        <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
+          <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="35" height="35" class="bounce-hover">
+        </a>
+        <a href="https://www.instagram.com/s3_gym_official" title="Instagram" target="_blank">
+          <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="35" height="35" class="bounce-hover">
+        </a>
+        <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
+          <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="35" height="35" class="bounce-hover">
+        </a>
+      {% endif %}
     </div>
 
     {% if session.get('admin_logged_in') %}
@@ -93,33 +89,22 @@
   </div>
 </nav>
 
+<!-- Public content visible only if NOT logged in -->
+{% if not session.get('admin_logged_in') %}
 <div class="offers-marquee container text-center">
   <marquee behavior="scroll" direction="left" scrollamount="5">
-    🎉 PT Offer: Get 20% Off! | 💪 Join Now  | 🏃‍♂️ Early Bird Discount Available!
+    🎉 PT Offer: Get 20% Off! | 💪 Join Now | 🏃‍♂️ Early Bird Discount Available!
   </marquee>
 </div>
 
-<!-- Equipment GIFs -->
 <div class="d-flex justify-content-center flex-wrap gap-5 py-4">
   <img src="{{ url_for('static', filename='images/treadmill.gif') }}" alt="Treadmill" class="rounded shadow-sm" style="height:160px;">
-  <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" alt="Exercise Bike" class="rounded shadow-sm" style="height:160px;">
+  <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" alt="Bike" class="rounded shadow-sm" style="height:160px;">
   <img src="{{ url_for('static', filename='images/dumbbell.gif') }}" alt="Dumbbell" class="rounded shadow-sm" style="height:160px;">
   <img src="{{ url_for('static', filename='images/squat.gif') }}" alt="Squat" class="rounded shadow-sm" style="height:160px;">
 </div>
 
 <div class="container text-center">
-
-  <!-- Only visible to admin -->
-  {% if session.get('admin_logged_in') %}
-    <div class="my-4">
-      <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
-      <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
-      <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
-      <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
-    </div>
-  {% endif %}
-
-  <hr>
 
   <!-- Achievements -->
   <h3 class="mt-5">🏆 Our Achievements</h3>
@@ -172,6 +157,17 @@
   </div>
 
 </div>
+{% endif %}
+
+<!-- Admin-only client data section -->
+{% if session.get('admin_logged_in') %}
+<div class="container text-center my-4">
+  <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
+  <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
+  <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
+  <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
+</div>
+{% endif %}
 
 <footer>
   <div class="container">

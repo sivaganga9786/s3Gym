@@ -7,25 +7,27 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-app.config.update(
-    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
-    SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
-    MAX_CONTENT_LENGTH=5 * 1024 * 1024
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'siva-secret')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 db = SQLAlchemy(app)
 
+# Ensure folders exist
 UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+BACKUP_FOLDER = 'static/backups'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(BACKUP_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
 def allowed_file(filename):
-    return '.' in filename and filename.lower().rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,109 +45,11 @@ class Client(db.Model):
     profile_image = db.Column(db.String(120), nullable=True)
 
 @app.route('/')
-def index():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-    query = request.args.get('search', '')
-    today = datetime.today().date()
-    clients = Client.query.filter(Client.name.ilike(f"%{query}%")).all() if query else Client.query.all()
-    upcoming_due = Client.query.filter(
-        Client.payment_status == 'unpaid',
-        Client.payment_due_date >= today,
-        Client.payment_due_date <= today + timedelta(days=2)
-    ).all()
-    return render_template('clients.html', clients=clients, upcoming_due=upcoming_due, query=query)
-
-@app.route('/add', methods=['GET', 'POST'])
-def add_client():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        try:
-            name = request.form.get('name')
-            contact = request.form.get('contact')
-            gender = request.form.get('gender')
-            client_type = request.form.get('client_type')
-            join_date_str = request.form.get('join_date')
-            payment_status = request.form.get('payment_status')
-            if not all([name, contact, gender, client_type, join_date_str, payment_status]):
-                flash("All required fields must be filled.", 'danger')
-                return redirect(url_for('add_client'))
-
-            if not contact.isdigit() or len(contact) != 10:
-                flash("Contact number must be 10 digits.", 'danger')
-                return redirect(url_for('add_client'))
-
-            join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
-            due = join_date + timedelta(days=30)
-            goal = request.form.get('goal')
-            weight = float(request.form.get('weight')) if request.form.get('weight') else None
-            fees = int(request.form.get('fees')) if request.form.get('fees') else 0
-
-            file = request.files.get('profile_image')
-            fname = None
-            if file and allowed_file(file.filename):
-                fname = secure_filename(file.filename)
-                file.save(os.path.join(UPLOAD_FOLDER, fname))
-
-            c = Client(
-                name=name, contact=contact, goal=goal, weight=weight,
-                gender=gender, client_type=client_type, fees=fees,
-                payment_status=payment_status, join_date=join_date,
-                payment_due_date=due, profile_image=fname,
-                last_updated=datetime.now()
-            )
-            db.session.add(c)
-            db.session.commit()
-            flash("Client added!", 'success')
-            return redirect(url_for('index'))
-        except Exception as e:
-            flash(f"Error: {e}", 'danger')
-            return redirect(url_for('add_client'))
-    return render_template('add_client.html')
-
-@app.route('/home')
 def home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
-    total_clients = Client.query.count()
-    due_clients = Client.query.filter(Client.payment_status == 'unpaid').count()
-    general_men = Client.query.filter_by(client_type='General', gender='Male').count()
-    general_women = Client.query.filter_by(client_type='General', gender='Female').count()
-    student_men = Client.query.filter_by(client_type='Student', gender='Male').count()
-    student_women = Client.query.filter_by(client_type='Student', gender='Female').count()
-
-    return render_template(
-        'home.html',
-        current_year=datetime.now().year,
-        total_clients=total_clients,
-        due_clients=due_clients,
-        general_men=general_men,
-        general_women=general_women,
-        student_men=student_men,
-        student_women=student_women
-    )
-
-@app.route('/due')
-def due_clients():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-    today = datetime.today().date()
-    next_3_days = today + timedelta(days=3)
-    due = Client.query.filter(
-        or_(
-            Client.payment_due_date < today,
-            Client.payment_due_date <= next_3_days
-        )
-    ).all()
-    return render_template('due_clients.html', clients=due)
-
-@app.route('/master')
-def master_list():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-    return render_template('master_list.html', clients=Client.query.order_by(Client.join_date.desc()).all())
+    total_members = Client.query.filter(Client.client_type != 'trainer').count()
+    total_trainers = Client.query.filter(Client.client_type == 'trainer').count()
+    return render_template('home.html', current_year=datetime.now().year,
+                           total_members=total_members, total_trainers=total_trainers)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -162,6 +66,97 @@ def logout():
     flash("Logged out", 'info')
     return redirect(url_for('login'))
 
+@app.route('/index')
+def index():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    clients = Client.query.all()
+    today = datetime.today().date()
+    upcoming_due = Client.query.filter(
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= today + timedelta(days=2)
+    ).all()
+    return render_template('clients.html', clients=clients, upcoming_due=upcoming_due)
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_client():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        try:
+            name = request.form.get('name')
+            contact = request.form.get('contact')
+            gender = request.form.get('gender')
+            client_type = request.form.get('client_type')
+            join_date_str = request.form.get('join_date')
+            payment_status = request.form.get('payment_status')
+
+            if not all([name, contact, gender, client_type, join_date_str, payment_status]):
+                flash("All required fields must be filled.", 'danger')
+                return redirect(url_for('add_client'))
+
+            if not contact.isdigit() or len(contact) != 10:
+                flash("Contact must be 10 digits.", 'danger')
+                return redirect(url_for('add_client'))
+
+            join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
+            due = join_date + timedelta(days=30)
+
+            goal = request.form.get('goal')
+            weight_str = request.form.get('weight')
+            weight = float(weight_str) if weight_str else None
+            fees = int(request.form.get('fees') or 0)
+
+            file = request.files.get('profile_image')
+            fname = None
+            if file and allowed_file(file.filename):
+                fname = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER, fname))
+
+            c = Client(
+                name=name,
+                contact=contact,
+                goal=goal,
+                weight=weight,
+                gender=gender,
+                client_type=client_type,
+                fees=fees,
+                payment_status=payment_status,
+                join_date=join_date,
+                payment_due_date=due,
+                profile_image=fname,
+                last_updated=datetime.now()
+            )
+            db.session.add(c)
+            db.session.commit()
+            flash("Client added!", 'success')
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(url_for('add_client'))
+
+    return render_template('add_client.html')
+
+@app.route('/due')
+def due_clients():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+    due = Client.query.filter(
+        or_(Client.payment_due_date < today,
+            Client.payment_due_date <= next_3_days)
+    ).all()
+    return render_template('due_clients.html', clients=due)
+
+@app.route('/master')
+def master_list():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    return render_template('master_list.html', clients=Client.query.order_by(Client.join_date.desc()).all())
+
 @app.route('/download_excel')
 def download_excel():
     if not session.get('admin_logged_in'):
@@ -176,8 +171,7 @@ def download_excel():
             'Last Updated': c.last_updated
         })
     df = pd.DataFrame(data)
-    os.makedirs('static/backups', exist_ok=True)
-    path = 'static/backups/clients.xlsx'
+    path = os.path.join(BACKUP_FOLDER, 'clients.xlsx')
     df.to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
@@ -185,6 +179,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 

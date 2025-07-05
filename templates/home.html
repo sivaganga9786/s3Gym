@@ -4,60 +4,176 @@
     <meta charset="UTF-8">
     <title>Gym Home</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .offers-marquee {
+            background-color: #ffeb3b;
+            color: #000;
+            padding: 10px;
+            font-weight: bold;
+        }
+        .scroll-gallery {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        .scroll-gallery img {
+            height: 120px;
+            border-radius: 8px;
+        }
+        .testimonial-card {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .bounce-hover {
+            transition: transform 0.2s ease-in-out;
+        }
+        .bounce-hover:hover {
+            animation: bounce 0.6s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-6px);
+            }
+        }
+        footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            background: #f8f9fa;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        footer a {
+            margin: 0 8px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body class="p-4">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand" href="{{ url_for('home') }}">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
-  </a>
+    <a class="navbar-brand" href="{{ url_for('home') }}">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
+    </a>
 
-  <div class="ms-auto d-flex align-items-center gap-3">
-    {% if session.get('admin_logged_in') %}
-      <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
-    {% else %}
-      <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
-    {% endif %}
-  </div>
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 me-4">
+            <a href="tel:+919398367605" title="Call">
+                <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="35" height="35" class="bounce-hover">
+            </a>
+            <a href="https://wa.me/919398367605" title="WhatsApp" target="_blank">
+                <img src="{{ url_for('static', filename='images/watsapp.jpg') }}" alt="WhatsApp" width="35" height="35" class="bounce-hover">
+            </a>
+            <a href="https://www.instagram.com/s3_gym_official" title="Instagram" target="_blank">
+                <img src="{{ url_for('static', filename='images/insta.jpg') }}" alt="Instagram" width="35" height="35" class="bounce-hover">
+            </a>
+            <a href="https://maps.app.goo.gl/QjpJDCWwMgJUKYbi9" title="Location" target="_blank">
+                <img src="{{ url_for('static', filename='images/location.jpg') }}" alt="Location" width="35" height="35" class="bounce-hover">
+            </a>
+        </div>
+
+        {% if session.get('admin_logged_in') %}
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
+        {% endif %}
+    </div>
 </nav>
 
-<div class="container text-center my-5">
-  {% if session.get('admin_logged_in') %}
-    <div class="my-4">
-        <a href="{{ url_for('index') }}" class="btn btn-primary m-2">
-            📋 Clients ({{ total_clients }})
-        </a>
-        <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">
-            📅 Due Clients ({{ due_clients }})
-        </a>
-        <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">
-            📚 Master List ({{ total_clients }})
-        </a>
-    </div>
-
-    <h5 class="mt-4">👥 Client Breakdown</h5>
-    <ul class="list-group list-group-flush text-start" style="max-width: 400px; margin: auto;">
-      <li class="list-group-item d-flex justify-content-between">
-        General - Male <span class="badge bg-primary">{{ general_men }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between">
-        General - Female <span class="badge bg-danger">{{ general_women }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between">
-        Student - Male <span class="badge bg-success">{{ student_men }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between">
-        Student - Female <span class="badge bg-warning text-dark">{{ student_women }}</span>
-      </li>
-    </ul>
-  {% endif %}
+<div class="offers-marquee container text-center">
+    <marquee behavior="scroll" direction="left" scrollamount="5">
+        🎉 PT Offer: Get 20% Off! | 💪 Join Now  | 🏃‍♂️ Early Bird Discount Available!
+    </marquee>
 </div>
 
-<footer class="text-center mt-5">
-  <p>&copy; {{ current_year }} Gym Management App</p>
+<div class="d-flex justify-content-center flex-wrap gap-5 py-4">
+    <img src="{{ url_for('static', filename='images/treadmill.gif') }}" alt="Treadmill" class="rounded shadow-sm" style="height:160px;">
+    <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" alt="Exercise Bike" class="rounded shadow-sm" style="height:160px;">
+    <img src="{{ url_for('static', filename='images/dumbbell.gif') }}" alt="Dumbbell" class="rounded shadow-sm" style="height:160px;">
+    <img src="{{ url_for('static', filename='images/squat.gif') }}" alt="Squat" class="rounded shadow-sm" style="height:160px;">
+</div>
+
+<div class="container text-center">
+
+    <!-- ✅ Buttons only visible after login -->
+    {% if session.get('admin_logged_in') %}
+    <div class="my-4">
+        <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
+        <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
+        <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
+        <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
+    </div>
+    {% endif %}
+
+    <hr>
+
+    <!-- Achievements (Visible Always) -->
+    <h3 class="mt-5">🏆 Our Achievements</h3>
+    <div class="row text-center">
+        <div class="col">
+            <h2>{{ total_members }}+</h2>
+            <p>Members</p>
+        </div>
+        <div class="col">
+            <h2>{{ total_trainers }}</h2>
+            <p>Expert Trainers</p>
+        </div>
+    </div>
+
+    <!-- Promo Video (Visible Always) -->
+    <h3 class="mt-5">🎥 Promo Video</h3>
+    <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
+        <div style="position:relative; width:100%; padding-bottom:56.25%;">
+            <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                    allowfullscreen title="S3 Gym Promo">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <h3 class="mt-5">💬 What Our Clients Say</h3>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="testimonial-card">
+                <p>"Great trainers and equipment. Love the atmosphere!"</p>
+                <small>- Mani Kanth, Trainer</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="testimonial-card">
+                <p>"S3 Gym helped me stay consistent. Highly recommend!"</p>
+                <small>- Siva Ganesh, Member</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery -->
+    <h3 class="text-center mt-4">Our Gym & Equipment</h3>
+    <div class="scroll-gallery">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
+        <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
+        <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; {{ current_year }} Gym Management App. All rights reserved.</p>
+    </div>
 </footer>
 
 </body>
 </html>
-
-

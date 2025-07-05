@@ -32,24 +32,21 @@
             transition: transform 0.2s ease;
             cursor: pointer;
         }
-
         .contact-icons img:hover {
             animation: bounce 0.4s ease;
         }
-          .bounce-hover {
+        .bounce-hover {
             transition: transform 0.2s ease-in-out;
         }
-
         .bounce-hover:hover {
             animation: bounce 0.6s infinite;
         }
-
         @keyframes bounce {
             0%, 100% {
-            transform: translateY(0);
+                transform: translateY(0);
             }
             50% {
-            transform: translateY(-6px);
+                transform: translateY(-6px);
             }
         }
         footer {
@@ -76,10 +73,7 @@
     <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
   </a>
 
-  <!-- Right side (Contact Icons + Logout/Login) -->
   <div class="ms-auto d-flex align-items-center gap-3">
-
-    <!-- Contact Icons with right margin -->
     <div class="d-flex align-items-center gap-3 me-4">
       <a href="tel:+919398367605" title="Call">
         <img src="{{ url_for('static', filename='images/phone.jpg') }}" alt="Call" width="35" height="35" class="bounce-hover">
@@ -95,17 +89,13 @@
       </a>
     </div>
 
-    <!-- Login/Logout -->
     {% if session.get('admin_logged_in') %}
       <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
     {% else %}
       <a href="{{ url_for('login') }}" class="btn btn-outline-light">Login</a>
     {% endif %}
-
   </div>
 </nav>
-
-
 
 <div class="offers-marquee container text-center">
     <marquee behavior="scroll" direction="left" scrollamount="5">
@@ -120,19 +110,21 @@
     <img src="{{ url_for('static', filename='images/squat.gif') }}" alt="Squat" class="rounded shadow-sm" style="height:160px;">
 </div>
 
-
 <div class="container text-center">
 
+    <!-- ✅ CLIENT DATA: ONLY visible after login -->
+    {% if session.get('admin_logged_in') %}
     <div class="my-4">
         <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Clients</a>
         <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Client Registration</a>
         <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
         <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
     </div>
+    {% endif %}
 
     <hr>
 
-    <!-- Animated Stats -->
+    <!-- Achievements -->
     <h3 class="mt-5">🏆 Our Achievements</h3>
     <div class="row text-center">
         <div class="col">
@@ -144,17 +136,17 @@
             <p>Expert Trainers</p>
         </div>
     </div>
-    <!-- YouTube Promo Video (Compact) -->
-        <h3 class="mt-5">🎥 Promo Video</h3>
-        <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
-            <div style="position:relative; width:100%; padding-bottom:56.25%;">
-                <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-                        style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                        allowfullscreen title="S3 Gym Promo">
-                </iframe>
-            </div>
-    </div>
 
+    <!-- Promo Video -->
+    <h3 class="mt-5">🎥 Promo Video</h3>
+    <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
+        <div style="position:relative; width:100%; padding-bottom:56.25%;">
+            <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+                    style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                    allowfullscreen title="S3 Gym Promo">
+            </iframe>
+        </div>
+    </div>
 
     <!-- Testimonials -->
     <h3 class="mt-5">💬 What Our Clients Say</h3>
@@ -172,6 +164,7 @@
             </div>
         </div>
     </div>
+
     <!-- Gallery -->
     <h3 class="text-center mt-4">Our Gym & Equipment</h3>
     <div class="scroll-gallery">
@@ -209,3 +202,4 @@
 
 </body>
 </html>
+

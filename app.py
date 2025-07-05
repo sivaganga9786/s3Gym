@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import pandas as pd
 import os
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
@@ -43,6 +43,14 @@ class Client(db.Model):
     profile_image = db.Column(db.String(120), nullable=True)
 
 @app.route('/')
+def root():
+    return redirect(url_for('home'))
+
+@app.route('/home')
+def home():
+    return render_template('home.html', current_year=datetime.now().year)
+
+@app.route('/index')
 def index():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
@@ -195,17 +203,11 @@ def login():
         flash("Invalid credentials", 'danger')
     return render_template('login.html')
 
-@app.route('/home')
-def home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-    return render_template('home.html', current_year=datetime.now().year)
-
 @app.route('/logout')
 def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 @app.route('/download_excel')
 def download_excel():

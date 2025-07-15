@@ -11,11 +11,13 @@
       <h2>📋 All Clients</h2>
       <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>
+
     <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
       <input name="search" placeholder="Search by name" class="form-control" value="{{ query }}">
       <button class="btn btn-primary">Search</button>
     </form>
-    <div class="d-flex gap-2 mb-3">
+
+    <div class="d-flex gap-2 mb-3 flex-wrap">
       <a href="{{ url_for('index', category='student') }}" class="btn btn-outline-success">Students</a>
       <a href="{{ url_for('index', category='general') }}" class="btn btn-outline-info">General</a>
       <a href="{{ url_for('download_excel_all') }}" class="btn btn-outline-dark">
@@ -30,10 +32,18 @@
     </div>
 
     <table class="table table-bordered table-striped">
-      <thead>
+      <thead class="table-dark">
         <tr>
-          <th>Name</th><th>Contact</th><th>Goal</th><th>Gender</th><th>Type</th>
-          <th>Fees</th><th>Status</th><th>Join</th><th>Due</th><th>Actions</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Goal</th>
+          <th>Gender</th>
+          <th>Type</th>
+          <th>Fees</th>
+          <th>Status</th>
+          <th>Join</th>
+          <th>Due</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -55,13 +65,19 @@
             </form>
           </td>
         </tr>
+        {% else %}
+        <tr>
+          <td colspan="10" class="text-center text-muted">No clients found.</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
+
     <div class="mt-3">
-      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Home</a>
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">🏠 Home</a>
       <a href="{{ url_for('add_client') }}" class="btn btn-success">➕ Add Client</a>
     </div>
   </div>
 </body>
 </html>
+

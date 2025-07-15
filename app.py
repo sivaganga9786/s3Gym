@@ -224,16 +224,12 @@ def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
     return redirect(url_for('home'))
-@app.route('/download_excel/<client_type>')
-def download_excel_by_type(client_type):
+@app.route('/download_excel_all')
+def download_excel_all():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
-    if client_type not in ['student', 'general']:
-        flash("Invalid client type!", 'danger')
-        return redirect(url_for('index'))
-
-    clients = Client.query.filter_by(client_type=client_type).all()
+    clients = Client.query.all()
 
     data = [{
         'Name': c.name,
@@ -249,13 +245,13 @@ def download_excel_by_type(client_type):
         'Last Updated': c.last_updated
     } for c in clients]
 
-    import pandas as pd, os
     df = pd.DataFrame(data)
     os.makedirs('static/backups', exist_ok=True)
-    path = f'static/backups/{client_type}_clients.xlsx'
+    path = 'static/backups/all_clients.xlsx'
     df.to_excel(path, index=False)
 
     return send_file(path, as_attachment=True)
+
 
 
 

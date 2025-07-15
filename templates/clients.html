@@ -7,9 +7,15 @@
 </head>
 <body class="bg-light p-4">
 <div class="container">
-  <div class="d-flex justify-content-between mb-4">
+  <div class="d-flex justify-content-between mb-3">
     <h2>📋 Clients</h2>
-    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+    <div>
+      <a href="{{ url_for('index', category='general') }}" class="btn btn-outline-primary me-1">General</a>
+      <a href="{{ url_for('index', category='student') }}" class="btn btn-outline-success me-1">Students</a>
+      <a href="{{ url_for('index') }}" class="btn btn-outline-dark me-2">All</a>
+      <a href="{{ url_for('download_excel_by_type', client_type='general') }}" class="btn btn-primary me-1">📥 Gen Excel</a>
+      <a href="{{ url_for('download_excel_by_type', client_type='student') }}" class="btn btn-success">📥 Stu Excel</a>
+    </div>
   </div>
 
   <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
@@ -69,7 +75,6 @@
 
   <div class="d-flex justify-content-center my-3">
     <a href="{{ url_for('home') }}" class="btn btn-secondary me-2">Home</a>
-    <a href="{{ url_for('download_excel') }}" class="btn btn-outline-info">Download Excel</a>
   </div>
 </div>
 </body>

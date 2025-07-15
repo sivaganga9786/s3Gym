@@ -3,17 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 from sqlalchemy import or_
-from dotenv import load_dotenv
 import pandas as pd
 import os
 
-# Load environment variables
-load_dotenv()
-
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL', 'sqlite:///clients.db'),
-    SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
+    SQLALCHEMY_DATABASE_URI='sqlite:///clients.db',
+    SECRET_KEY='siva-secret',
     MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
 
@@ -25,7 +21,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
-    return '.' in filename and filename.lower().rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -69,7 +65,6 @@ def index():
         base_query = base_query.filter(Client.name.ilike(f"%{query}%"))
 
     clients = base_query.all()
-
     upcoming_due = base_query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date >= today,
@@ -146,6 +141,69 @@ def add_client():
 
     return render_template('add_client.html')
 
+@app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
+def edit_client(client_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    client = Client.query.get_or_404(client_id)
+
+    if request.method == 'POST':
+        try:
+            client.name = request.form['name']
+            client.contact = request.form['contact']
+            client.goal = request.form['goal']
+            client.weight = float(request.form['weight']) if request.form.get('weight') else None
+            client.gender = request.form['gender']
+            client.client_type = request.form['client_type']
+            client.fees = int(request.form['fees']) if request.form.get('fees') else 0
+            client.payment_status = request.form['payment_status']
+            client.join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
+            client.payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
+
+            file = request.files.get('profile_image')
+            if file and allowed_file(file.filename):
+                fname = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], fname))
+                client.profile_image = fname
+
+            client.last_updated = datetime.now()
+            db.session.commit()
+            flash("Client updated!", 'success')
+            return redirect(url_for('index'))
+
+        except Exception as e:
+            flash(f"Error: {e}", 'danger')
+            return redirect(url_for('edit_client', client_id=client_id))
+
+    return render_template('edit_client.html', client=client)
+
+@app.route('/delete/<int:client_id>', methods=['POST'])
+def delete_client(client_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    db.session.delete(Client.query.get_or_404(client_id))
+    db.session.commit()
+    flash("Client deleted.", 'info')
+    return redirect(url_for('index'))
+
+@app.route('/due')
+def due_clients():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+
+    due = Client.query.filter(
+        or_(
+            Client.payment_due_date < today,
+            Client.payment_due_date <= next_3_days
+        )
+    ).all()
+    return render_template('due_clients.html', clients=due)
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -219,4 +277,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 

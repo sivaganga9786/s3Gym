@@ -8,7 +8,7 @@ import os
 
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
+    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL', 'sqlite:///clients.db'),
     SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
     MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
@@ -44,7 +44,28 @@ def root():
 
 @app.route('/home')
 def home():
-    return render_template('home.html', current_year=datetime.now().year)
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+
+    total_clients = Client.query.count()
+    total_students = Client.query.filter_by(client_type='student').count()
+    total_general = Client.query.filter_by(client_type='general').count()
+
+    due_clients_count = Client.query.filter(
+        Client.payment_due_date <= next_3_days
+    ).count()
+
+    return render_template(
+        'home.html',
+        current_year=datetime.now().year,
+        total_clients=total_clients,
+        total_students=total_students,
+        total_general=total_general,
+        due_clients_count=due_clients_count
+    )
 
 @app.route('/index')
 def index():
@@ -196,19 +217,14 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    # 🔁 Auto-update status to 'unpaid' if due date is near or passed
-    due_soon_clients = Client.query.filter(
-        Client.payment_due_date <= next_3_days
-    ).all()
-
+    # Auto update status to unpaid
+    due_soon_clients = Client.query.filter(Client.payment_due_date <= next_3_days).all()
     for client in due_soon_clients:
         if client.payment_status != 'unpaid':
             client.payment_status = 'unpaid'
             client.last_updated = datetime.now()
-
     db.session.commit()
 
-    # 🎯 Now fetch those clients for display
     due_clients = Client.query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date <= next_3_days
@@ -227,8 +243,6 @@ def mark_paid(client_id):
     db.session.commit()
     flash(f"{client.name} marked as paid.", "success")
     return redirect(url_for('due_clients'))
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -269,31 +283,6 @@ def download_excel_all():
     path = 'static/backups/all_clients.xlsx'
     pd.DataFrame(data).to_excel(path, index=False)
     return send_file(path, as_attachment=True)
-@app.route('/home')
-def home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
-    today = datetime.today().date()
-    next_3_days = today + timedelta(days=3)
-
-    total_clients = Client.query.count()
-    total_students = Client.query.filter_by(client_type='student').count()
-    total_general = Client.query.filter_by(client_type='general').count()
-
-    due_clients_count = Client.query.filter(
-        Client.payment_due_date >= today,
-        Client.payment_due_date <= next_3_days
-    ).count()
-
-    return render_template(
-        'home.html',
-        current_year=datetime.now().year,
-        total_clients=total_clients,
-        total_students=total_students,
-        total_general=total_general,
-        due_clients_count=due_clients_count
-    )
 
 @app.route('/download_excel/<client_type>')
 def download_excel_by_type(client_type):
@@ -328,5 +317,3 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
-
-

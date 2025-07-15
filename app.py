@@ -173,6 +173,12 @@ def logout():
     flash("Logged out", 'info')
     return redirect(url_for('home'))
 
+@app.route('/master')
+def master_list():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    return render_template('master_list.html', clients=Client.query.order_by(Client.join_date.desc()).all())
+
 @app.route('/download_excel/<client_type>')
 def download_excel_by_type(client_type):
     if not session.get('admin_logged_in'):

@@ -7,15 +7,15 @@ import os
 import cloudinary
 import cloudinary.uploader
 
-# Flask config
+# Flask basic config
 app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL', 'sqlite:///clients.db'),
     SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
-    MAX_CONTENT_LENGTH=5 * 1024 * 1024  # 5MB max upload
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024  # 5 MB
 )
 
-# Cloudinary credentials from environment variables
+# Cloudinary config from environment
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
@@ -29,7 +29,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# DB Model
+# Database model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -55,15 +55,19 @@ def home():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    total_clients = Client.query.count()
-    total_students = Client.query.filter_by(client_type='student').count()
-    total_general = Client.query.filter_by(client_type='general').count()
-    due_clients_count = Client.query.filter(
-        Client.payment_status == 'unpaid',
-        Client.payment_due_date <= next_3_days
-    ).count()
+    # Show stats only to admin
+    total_clients = total_students = total_general = due_clients_count = 0
+    if session.get('admin_logged_in'):
+        total_clients = Client.query.count()
+        total_students = Client.query.filter_by(client_type='student').count()
+        total_general = Client.query.filter_by(client_type='general').count()
+        due_clients_count = Client.query.filter(
+            Client.payment_status == 'unpaid',
+            Client.payment_due_date <= next_3_days
+        ).count()
 
-    return render_template('home.html',
+    return render_template(
+        'home.html',
         current_year=datetime.now().year,
         total_clients=total_clients,
         total_students=total_students,
@@ -106,7 +110,7 @@ def index():
     clients = base_query.all()
     return render_template('paid_clients.html', clients=clients, query=query, category=category)
 
-@app.route('/paid')  # Optional: keep for backwards compatibility
+@app.route('/paid')
 def paid_clients():
     return redirect(url_for('index'))
 
@@ -204,30 +208,6 @@ def add_client():
             return redirect(url_for('add_client'))
 
     return render_template('add_client.html')
-@app.route('/home')
-def home():
-    today = datetime.today().date()
-    next_3_days = today + timedelta(days=3)
-
-    # Only calculate stats if logged in (to avoid errors)
-    total_clients = total_students = total_general = due_clients_count = 0
-    if session.get('admin_logged_in'):
-        total_clients = Client.query.count()
-        total_students = Client.query.filter_by(client_type='student').count()
-        total_general = Client.query.filter_by(client_type='general').count()
-        due_clients_count = Client.query.filter(
-            Client.payment_status == 'unpaid',
-            Client.payment_due_date <= next_3_days
-        ).count()
-
-    return render_template(
-        'home.html',
-        current_year=datetime.now().year,
-        total_clients=total_clients,
-        total_students=total_students,
-        total_general=total_general,
-        due_clients_count=due_clients_count
-    )
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
@@ -337,7 +317,7 @@ def download_excel_by_type(client_type):
     df.to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
-# App run
+# Entry point
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

@@ -1,1 +1,29 @@
-HOME PAGE TEMPLATE PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gym Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+
+  <div class="container text-center">
+    <h1>🏋️‍♂️ Welcome to S3 Gym Management</h1>
+    <p class="lead">Manage your gym clients, dues, and registrations with ease.</p>
+
+    {% if session.get('admin_logged_in') %}
+      <div class="d-grid gap-2 col-6 mx-auto mt-5">
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">📋 View Clients</a>
+        <a href="{{ url_for('add_client') }}" class="btn btn-success btn-lg">➕ Add New Client</a>
+        <a href="{{ url_for('due_clients') }}" class="btn btn-warning btn-lg">📅 Due Clients</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger btn-lg">🔓 Logout</a>
+      </div>
+    {% else %}
+      <div class="mt-5">
+        <a href="{{ url_for('login') }}" class="btn btn-outline-dark btn-lg">🔐 Admin Login</a>
+      </div>
+    {% endif %}
+  </div>
+
+</body>
+</html>

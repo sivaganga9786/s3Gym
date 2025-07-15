@@ -74,9 +74,9 @@ def index():
 
     category = request.args.get('category')
     query = request.args.get('search', '')
-    today = datetime.today().date()
 
-    base_query = Client.query
+    base_query = Client.query.filter(Client.payment_status == 'paid')
+
     if category == 'student':
         base_query = base_query.filter(Client.client_type == 'student')
     elif category == 'general':
@@ -86,13 +86,9 @@ def index():
         base_query = base_query.filter(Client.name.ilike(f"%{query}%"))
 
     clients = base_query.all()
-    upcoming_due = base_query.filter(
-        Client.payment_status == 'unpaid',
-        Client.payment_due_date >= today,
-        Client.payment_due_date <= today + timedelta(days=2)
-    ).all()
 
-    return render_template('paid_clients.html', clients=clients, upcoming_due=upcoming_due, query=query, category=category)
+    return render_template('paid_clients.html', clients=clients, query=query, category=category)
+
 @app.route('/paid')
 def paid_clients():
     if not session.get('admin_logged_in'):

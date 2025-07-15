@@ -204,6 +204,30 @@ def add_client():
             return redirect(url_for('add_client'))
 
     return render_template('add_client.html')
+@app.route('/home')
+def home():
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+
+    # Only calculate stats if logged in (to avoid errors)
+    total_clients = total_students = total_general = due_clients_count = 0
+    if session.get('admin_logged_in'):
+        total_clients = Client.query.count()
+        total_students = Client.query.filter_by(client_type='student').count()
+        total_general = Client.query.filter_by(client_type='general').count()
+        due_clients_count = Client.query.filter(
+            Client.payment_status == 'unpaid',
+            Client.payment_due_date <= next_3_days
+        ).count()
+
+    return render_template(
+        'home.html',
+        current_year=datetime.now().year,
+        total_clients=total_clients,
+        total_students=total_students,
+        total_general=total_general,
+        due_clients_count=due_clients_count
+    )
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
@@ -386,6 +410,7 @@ if __name__ == '__main__':
 #         total_general=total_general,
 #         due_clients_count=due_clients_count
 #     )
+
 
 # @app.route('/login', methods=['GET', 'POST'])
 # def login():

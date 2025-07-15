@@ -64,6 +64,7 @@
 </head>
 <body class="p-4">
 
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
   <a class="navbar-brand" href="{{ url_for('home') }}">
     <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
@@ -93,12 +94,14 @@
   </div>
 </nav>
 
+<!-- Marquee -->
 <div class="offers-marquee container text-center">
   <marquee behavior="scroll" direction="left" scrollamount="5">
-    🎉 PT Offer: Get 20% Off! | 💪 Join Now  | 🏃‍♂️ Early Bird Discount Available!
+    🎉 PT Offer: Get 20% Off! | 💪 Join Now | 🏃‍♂️ Early Bird Discount Available!
   </marquee>
 </div>
 
+<!-- Gym Images -->
 <div class="d-flex justify-content-center flex-wrap gap-5 py-4">
   <img src="{{ url_for('static', filename='images/treadmill.gif') }}" alt="Treadmill" class="rounded shadow-sm" style="height:160px;">
   <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" alt="Exercise Bike" class="rounded shadow-sm" style="height:160px;">
@@ -106,6 +109,7 @@
   <img src="{{ url_for('static', filename='images/squat.gif') }}" alt="Squat" class="rounded shadow-sm" style="height:160px;">
 </div>
 
+<!-- Admin-only section -->
 {% if session.get('admin_logged_in') %}
 <div class="container text-center">
   <div class="my-4">
@@ -117,7 +121,7 @@
 
   <hr>
 
-  <!-- Stats -->
+  <!-- Animated Stats -->
   <h3 class="mt-5">🏆 Our Achievements</h3>
   <div class="row text-center">
     <div class="col">
@@ -132,7 +136,7 @@
 </div>
 {% endif %}
 
-<!-- YouTube Promo Video -->
+<!-- Promo Video -->
 <h3 class="mt-5 text-center">🎥 Promo Video</h3>
 <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
   <div style="position:relative; width:100%; padding-bottom:56.25%;">
@@ -170,12 +174,14 @@
   <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
 </div>
 
+<!-- Footer -->
 <footer>
   <div class="container">
     <p>&copy; {{ current_year }} Gym Management App. All rights reserved.</p>
   </div>
 </footer>
 
+<!-- JS Animation (only if logged in) -->
 {% if session.get('admin_logged_in') %}
 <script>
   function animateValue(id, start, end, duration) {
@@ -198,6 +204,7 @@
 
 </body>
 </html>
+
 
 
 

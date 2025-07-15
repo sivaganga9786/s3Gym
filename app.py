@@ -197,12 +197,12 @@ def due_clients():
     next_3_days = today + timedelta(days=3)
 
     due = Client.query.filter(
-        or_(
-            Client.payment_due_date < today,
-            Client.payment_due_date <= next_3_days
-        )
-    ).all()
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= next_3_days
+    ).order_by(Client.payment_due_date).all()
+
     return render_template('due_clients.html', clients=due)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

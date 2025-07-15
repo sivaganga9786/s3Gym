@@ -145,6 +145,20 @@ def add_client():
             return redirect(url_for('add_client'))
 
     return render_template('add_client.html')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username'] == 'admin' and request.form['password'] == 'admin123':
+            session['admin_logged_in'] = True
+            return redirect(url_for('home'))
+        flash("Invalid credentials", 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    flash("Logged out", 'info')
+    return redirect(url_for('home'))
 
 @app.route('/download_excel/<client_type>')
 def download_excel_by_type(client_type):

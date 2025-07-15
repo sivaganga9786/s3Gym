@@ -8,8 +8,8 @@ import os
 
 app = Flask(__name__)
 app.config.update(
-    SQLALCHEMY_DATABASE_URI='sqlite:///clients.db',
-    SECRET_KEY='siva-secret',
+    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'),
+    SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
     MAX_CONTENT_LENGTH=5 * 1024 * 1024
 )
 

@@ -28,15 +28,8 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
-    .contact-icons img {
-      transition: transform 0.2s ease;
-      cursor: pointer;
-    }
     .contact-icons img:hover {
       animation: bounce 0.4s ease;
-    }
-    .bounce-hover {
-      transition: transform 0.2s ease-in-out;
     }
     .bounce-hover:hover {
       animation: bounce 0.6s infinite;
@@ -52,14 +45,6 @@
       text-align: center;
       border-top: 1px solid #dee2e6;
     }
-    footer a {
-      margin: 0 8px;
-      text-decoration: none;
-      color: #007bff;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
   </style>
 </head>
 <body class="p-4">
@@ -69,7 +54,6 @@
   <a class="navbar-brand" href="{{ url_for('home') }}">
     <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Gym Logo" height="100">
   </a>
-
   <div class="ms-auto d-flex align-items-center gap-3">
     <div class="d-flex align-items-center gap-3 me-4">
       <a href="tel:+919398367605" title="Call">
@@ -96,21 +80,19 @@
 
 <!-- Marquee -->
 <div class="offers-marquee container text-center">
-  <marquee behavior="scroll" direction="left" scrollamount="5">
-    🎉 PT Offer: Get 20% Off! | 💪 Join Now | 🏃‍♂️ Early Bird Discount Available!
-  </marquee>
+  <marquee>🎉 PT Offer: Get 20% Off! | 💪 Join Now | 🏃‍♂️ Early Bird Discount Available!</marquee>
 </div>
 
-<!-- Gym Images -->
+<!-- Equipment GIFs -->
 <div class="d-flex justify-content-center flex-wrap gap-5 py-4">
-  <img src="{{ url_for('static', filename='images/treadmill.gif') }}" alt="Treadmill" class="rounded shadow-sm" style="height:160px;">
-  <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" alt="Exercise Bike" class="rounded shadow-sm" style="height:160px;">
-  <img src="{{ url_for('static', filename='images/dumbbell.gif') }}" alt="Dumbbell" class="rounded shadow-sm" style="height:160px;">
-  <img src="{{ url_for('static', filename='images/squat.gif') }}" alt="Squat" class="rounded shadow-sm" style="height:160px;">
+  <img src="{{ url_for('static', filename='images/treadmill.gif') }}" class="rounded shadow-sm" style="height:160px;">
+  <img src="{{ url_for('static', filename='images/exercise_bike.gif') }}" class="rounded shadow-sm" style="height:160px;">
+  <img src="{{ url_for('static', filename='images/dumbbell.gif') }}" class="rounded shadow-sm" style="height:160px;">
+  <img src="{{ url_for('static', filename='images/squat.gif') }}" class="rounded shadow-sm" style="height:160px;">
 </div>
 
-<!-- Admin-only section -->
 {% if session.get('admin_logged_in') %}
+<!-- Admin-only buttons and stats -->
 <div class="container text-center">
   <div class="my-4">
     <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Paid Clients</a>
@@ -118,10 +100,7 @@
     <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
     <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
   </div>
-
   <hr>
-
-  <!-- Animated Stats -->
   <h3 class="mt-5">🏆 Our Achievements</h3>
   <div class="row text-center">
     <div class="col">
@@ -140,10 +119,7 @@
 <h3 class="mt-5 text-center">🎥 Promo Video</h3>
 <div class="mb-4" style="max-width: 500px; margin: 0 auto;">
   <div style="position:relative; width:100%; padding-bottom:56.25%;">
-    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-            style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-            allowfullscreen title="S3 Gym Promo">
-    </iframe>
+    <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen title="S3 Gym Promo"></iframe>
   </div>
 </div>
 
@@ -167,11 +143,9 @@
 <!-- Gallery -->
 <h3 class="text-center mt-4">Our Gym & Equipment</h3>
 <div class="scroll-gallery">
-  <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 1">
-  <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 2">
-  <img src="{{ url_for('static', filename='images/logo1.png') }}" alt="Gym 3">
-  <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 1">
-  <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Equipment 2">
+  <img src="{{ url_for('static', filename='images/logo1.png') }}">
+  <img src="{{ url_for('static', filename='images/logo1.png') }}">
+  <img src="{{ url_for('static', filename='images/logo2.png') }}">
 </div>
 
 <!-- Footer -->
@@ -181,29 +155,29 @@
   </div>
 </footer>
 
-<!-- JS Animation (only if logged in) -->
+<!-- Animate Stats -->
 {% if session.get('admin_logged_in') %}
 <script>
-  function animateValue(id, start, end, duration) {
-    const obj = document.getElementById(id);
-    let current = start;
-    const range = end - start;
-    const stepTime = Math.abs(Math.floor(duration / range));
-    const timer = setInterval(function () {
-      current += 1;
-      obj.textContent = current + "+";
-      if (current >= end) {
-        clearInterval(timer);
-      }
-    }, stepTime);
-  }
-  animateValue("members", 0, {{ total_clients }}, 1000);
-  animateValue("trainers", 0, 3, 1000);
+function animateValue(id, start, end, duration) {
+  const obj = document.getElementById(id);
+  let current = start;
+  const range = end - start;
+  const stepTime = Math.abs(Math.floor(duration / range));
+  const timer = setInterval(function () {
+    current += 1;
+    obj.textContent = current + "+";
+    if (current >= end) {
+      clearInterval(timer);
+    }
+  }, stepTime);
+}
+animateValue("members", 0, {{ total_clients }}, 1000);
+animateValue("trainers", 0, 3, 1000);
 </script>
 {% endif %}
-
 </body>
 </html>
+
 
 
 

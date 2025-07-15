@@ -24,12 +24,10 @@ cloudinary.config(
 
 db = SQLAlchemy(app)
 
-# Helpers
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# DB Model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -45,14 +43,36 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(300), nullable=True)
 
-# Routes
 @app.route('/')
 def root():
     return redirect(url_for('home'))
 
 @app.route('/home')
 def home():
-    return render_template('home.html', current_year=datetime.now().year)
+    if session.get('admin_logged_in'):
+        today = datetime.today().date()
+        next_3_days = today + timedelta(days=3)
+
+        total_clients = Client.query.count()
+        total_students = Client.query.filter_by(client_type='student').count()
+        total_general = Client.query.filter_by(client_type='general').count()
+        due_clients_count = Client.query.filter(
+            Client.payment_status == 'unpaid',
+            Client.payment_due_date <= next_3_days
+        ).count()
+    else:
+        total_clients = 0
+        total_students = 0
+        total_general = 0
+        due_clients_count = 0
+
+    return render_template('home.html',
+        current_year=datetime.now().year,
+        total_clients=total_clients,
+        total_students=total_students,
+        total_general=total_general,
+        due_clients_count=due_clients_count
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -283,6 +303,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 

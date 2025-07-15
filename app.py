@@ -106,7 +106,6 @@ def add_client():
             goal = request.form.get('goal')
             weight_str = request.form.get('weight')
             weight = float(weight_str) if weight_str else None
-
             if weight and (weight < 50 or weight > 110):
                 flash("Weight must be between 50–110 kg.", 'danger')
                 return redirect(url_for('add_client'))
@@ -147,69 +146,6 @@ def add_client():
 
     return render_template('add_client.html')
 
-@app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
-def edit_client(client_id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
-    client = Client.query.get_or_404(client_id)
-
-    if request.method == 'POST':
-        try:
-            client.name = request.form['name']
-            client.contact = request.form['contact']
-            client.goal = request.form['goal']
-            client.weight = float(request.form['weight']) if request.form.get('weight') else None
-            client.gender = request.form['gender']
-            client.client_type = request.form['client_type']
-            client.fees = int(request.form['fees']) if request.form.get('fees') else 0
-            client.payment_status = request.form['payment_status']
-            client.join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
-            client.payment_due_date = datetime.strptime(request.form['payment_due_date'], "%Y-%m-%d").date()
-
-            file = request.files.get('profile_image')
-            if file and allowed_file(file.filename):
-                fname = secure_filename(file.filename)
-                file.save(os.path.join(UPLOAD_FOLDER, fname))
-                client.profile_image = fname
-
-            client.last_updated = datetime.now()
-            db.session.commit()
-            flash("Client updated!", 'success')
-            return redirect(url_for('index'))
-
-        except Exception as e:
-            flash(f"Error: {e}", 'danger')
-            return redirect(url_for('edit_client', client_id=client_id))
-
-    return render_template('edit_client.html', client=client)
-
-@app.route('/delete/<int:client_id>', methods=['POST'])
-def delete_client(client_id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
-    db.session.delete(Client.query.get_or_404(client_id))
-    db.session.commit()
-    flash("Client deleted.", 'info')
-    return redirect(url_for('index'))
-
-@app.route('/due')
-def due_clients():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
-    today = datetime.today().date()
-    next_3_days = today + timedelta(days=3)
-
-    due = Client.query.filter(
-        or_(
-            Client.payment_due_date < today,
-            Client.payment_due_date <= next_3_days
-        )
-    ).all()
-    return render_template('due_clients.html', clients=due)
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -224,13 +160,13 @@ def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
     return redirect(url_for('home'))
+
 @app.route('/download_excel_all')
 def download_excel_all():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
     clients = Client.query.all()
-
     data = [{
         'Name': c.name,
         'Contact': c.contact,
@@ -245,17 +181,42 @@ def download_excel_all():
         'Last Updated': c.last_updated
     } for c in clients]
 
-    df = pd.DataFrame(data)
     os.makedirs('static/backups', exist_ok=True)
     path = 'static/backups/all_clients.xlsx'
-    df.to_excel(path, index=False)
-
+    pd.DataFrame(data).to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
+@app.route('/download_excel/<client_type>')
+def download_excel_by_type(client_type):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
 
+    if client_type not in ['student', 'general']:
+        flash("Invalid client type!", 'danger')
+        return redirect(url_for('index'))
 
+    clients = Client.query.filter_by(client_type=client_type).all()
+    data = [{
+        'Name': c.name,
+        'Contact': c.contact,
+        'Goal': c.goal,
+        'Weight': c.weight,
+        'Gender': c.gender,
+        'Type': c.client_type,
+        'Fees': c.fees,
+        'Payment Status': c.payment_status,
+        'Join Date': c.join_date,
+        'Due Date': c.payment_due_date,
+        'Last Updated': c.last_updated
+    } for c in clients]
+
+    os.makedirs('static/backups', exist_ok=True)
+    path = f'static/backups/{client_type}_clients.xlsx'
+    pd.DataFrame(data).to_excel(path, index=False)
+    return send_file(path, as_attachment=True)
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+

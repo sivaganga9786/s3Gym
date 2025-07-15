@@ -153,6 +153,19 @@ def login():
             return redirect(url_for('home'))
         flash("Invalid credentials", 'danger')
     return render_template('login.html')
+@app.route('/due')
+def due_clients():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+    due = Client.query.filter(
+        or_(
+            Client.payment_due_date < today,
+            Client.payment_due_date <= next_3_days
+        )
+    ).all()
+    return render_template('due_clients.html', clients=due)
 
 @app.route('/logout')
 def logout():

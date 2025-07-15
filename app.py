@@ -92,7 +92,20 @@ def index():
         Client.payment_due_date <= today + timedelta(days=2)
     ).all()
 
-    return render_template('clients.html', clients=clients, upcoming_due=upcoming_due, query=query, category=category)
+    return render_template('paid_clients.html', clients=clients, upcoming_due=upcoming_due, query=query, category=category)
+@app.route('/paid')
+def paid_clients():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    query = request.args.get('search', '')
+    base_query = Client.query.filter_by(payment_status='paid')
+
+    if query:
+        base_query = base_query.filter(Client.name.ilike(f"%{query}%"))
+
+    clients = base_query.all()
+    return render_template('paid_clients.html', clients=clients, query=query)
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
@@ -258,6 +271,40 @@ def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
     return redirect(url_for('home'))
+@app.route('/master')
+def master_list():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    clients = Client.query.order_by(Client.join_date.desc()).all()
+    return render_template('master_list.html', clients=clients)
+
+@app.route('/download_excel_master')
+def download_excel_master():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    clients = Client.query.order_by(Client.join_date.desc()).all()
+    data = [{
+        'Name': c.name,
+        'Contact': c.contact,
+        'Goal': c.goal,
+        'Weight': c.weight,
+        'Gender': c.gender,
+        'Type': c.client_type,
+        'Fees': c.fees,
+        'Payment Status': c.payment_status,
+        'Join Date': c.join_date,
+        'Due Date': c.payment_due_date,
+        'Last Updated': c.last_updated
+    } for c in clients]
+
+    os.makedirs('static/backups', exist_ok=True)
+    path = 'static/backups/master_clients.xlsx'
+    pd.DataFrame(data).to_excel(path, index=False)
+
+    return send_file(path, as_attachment=True)
+
 
 @app.route('/download_excel_all')
 def download_excel_all():

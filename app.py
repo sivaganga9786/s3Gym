@@ -226,20 +226,26 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    # Auto update status to unpaid
-    due_soon_clients = Client.query.filter(Client.payment_due_date <= next_3_days).all()
+    # ✅ Only update if status is still 'paid' and due soon
+    due_soon_clients = Client.query.filter(
+        Client.payment_due_date <= next_3_days,
+        Client.payment_status == 'paid'
+    ).all()
+
     for client in due_soon_clients:
-        if client.payment_status != 'unpaid':
-            client.payment_status = 'unpaid'
-            client.last_updated = datetime.now()
+        client.payment_status = 'unpaid'
+        client.last_updated = datetime.now()
+
     db.session.commit()
 
+    # ✅ Now only fetch unpaid clients
     due_clients = Client.query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date <= next_3_days
     ).all()
 
     return render_template('due_clients.html', clients=due_clients)
+
 
 @app.route('/mark_paid/<int:client_id>', methods=['POST'])
 def mark_paid(client_id):

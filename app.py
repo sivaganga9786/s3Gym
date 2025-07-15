@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
 import pandas as pd
 import os
-
-# ✅ Cloudinary integration
 import cloudinary
 import cloudinary.uploader
 
@@ -14,10 +12,10 @@ app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL', 'sqlite:///clients.db'),
     SECRET_KEY=os.getenv('SECRET_KEY', 'siva-secret'),
-    MAX_CONTENT_LENGTH=5 * 1024 * 1024
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024  # 5MB max upload
 )
 
-# ✅ Cloudinary config from environment
+# Cloudinary credentials from environment variables
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
@@ -26,10 +24,12 @@ cloudinary.config(
 
 db = SQLAlchemy(app)
 
+# Helpers
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# DB Model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -45,6 +45,7 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(300), nullable=True)
 
+# Routes
 @app.route('/')
 def root():
     return redirect(url_for('home'))
@@ -62,8 +63,7 @@ def home():
         Client.payment_due_date <= next_3_days
     ).count()
 
-    return render_template(
-        'home.html',
+    return render_template('home.html',
         current_year=datetime.now().year,
         total_clients=total_clients,
         total_students=total_students,
@@ -106,6 +106,10 @@ def index():
     clients = base_query.all()
     return render_template('paid_clients.html', clients=clients, query=query, category=category)
 
+@app.route('/paid')  # Optional: keep for backwards compatibility
+def paid_clients():
+    return redirect(url_for('index'))
+
 @app.route('/due')
 def due_clients():
     if not session.get('admin_logged_in'):
@@ -114,12 +118,12 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    due_soon_clients = Client.query.filter(
+    due_soon = Client.query.filter(
         Client.payment_status == 'paid',
         Client.payment_due_date <= next_3_days
     ).all()
 
-    for client in due_soon_clients:
+    for client in due_soon:
         client.payment_status = 'unpaid'
         client.last_updated = datetime.now()
 
@@ -152,55 +156,43 @@ def add_client():
 
     if request.method == 'POST':
         try:
-            name = request.form.get('name')
-            contact = request.form.get('contact')
-            gender = request.form.get('gender')
-            client_type = request.form.get('client_type')
-            join_date_str = request.form.get('join_date')
-            payment_status = request.form.get('payment_status')
+            name = request.form['name']
+            contact = request.form['contact']
+            gender = request.form['gender']
+            client_type = request.form['client_type']
+            join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
+            payment_status = request.form['payment_status']
+            goal = request.form.get('goal')
+            weight = float(request.form['weight']) if request.form.get('weight') else None
+            fees = int(request.form['fees']) if request.form.get('fees') else 0
+            due = join_date + timedelta(days=30)
 
-            if not all([name, contact, gender, client_type, join_date_str, payment_status]):
+            if not all([name, contact, gender, client_type, join_date, payment_status]):
                 flash("All required fields must be filled.", 'danger')
                 return redirect(url_for('add_client'))
 
             if not contact.isdigit() or len(contact) != 10:
-                flash("Contact number must be exactly 10 digits.", 'danger')
+                flash("Contact must be 10 digits.", 'danger')
                 return redirect(url_for('add_client'))
 
-            join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
-            due = join_date + timedelta(days=30)
-
-            goal = request.form.get('goal')
-            weight_str = request.form.get('weight')
-            weight = float(weight_str) if weight_str else None
             if weight and (weight < 50 or weight > 110):
-                flash("Weight must be between 50–110 kg.", 'danger')
+                flash("Weight must be between 50–110kg.", 'danger')
                 return redirect(url_for('add_client'))
 
-            fees_str = request.form.get('fees')
-            fees = int(fees_str) if fees_str and fees_str.isdigit() else 0
-
-            file = request.files.get('profile_image')
             image_url = None
+            file = request.files.get('profile_image')
             if file and allowed_file(file.filename):
                 upload_result = cloudinary.uploader.upload(file)
                 image_url = upload_result.get("secure_url")
 
-            c = Client(
-                name=name,
-                contact=contact,
-                goal=goal,
-                weight=weight,
-                gender=gender,
-                client_type=client_type,
-                fees=fees,
-                payment_status=payment_status,
-                join_date=join_date,
-                payment_due_date=due,
-                profile_image=image_url,
+            client = Client(
+                name=name, contact=contact, goal=goal, weight=weight,
+                gender=gender, client_type=client_type, fees=fees,
+                payment_status=payment_status, join_date=join_date,
+                payment_due_date=due, profile_image=image_url,
                 last_updated=datetime.now()
             )
-            db.session.add(c)
+            db.session.add(client)
             db.session.commit()
             flash("Client added!", 'success')
             return redirect(url_for('index'))
@@ -273,7 +265,7 @@ def download_excel_master():
         return redirect(url_for('login'))
 
     clients = Client.query.order_by(Client.join_date.desc()).all()
-    data = [{
+    df = pd.DataFrame([{
         'Name': c.name,
         'Contact': c.contact,
         'Goal': c.goal,
@@ -285,11 +277,11 @@ def download_excel_master():
         'Join Date': c.join_date,
         'Due Date': c.payment_due_date,
         'Last Updated': c.last_updated
-    } for c in clients]
+    } for c in clients])
 
     os.makedirs('static/backups', exist_ok=True)
     path = 'static/backups/master_clients.xlsx'
-    pd.DataFrame(data).to_excel(path, index=False)
+    df.to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
 @app.route('/download_excel/<client_type>')
@@ -302,7 +294,7 @@ def download_excel_by_type(client_type):
         return redirect(url_for('index'))
 
     clients = Client.query.filter_by(client_type=client_type).all()
-    data = [{
+    df = pd.DataFrame([{
         'Name': c.name,
         'Contact': c.contact,
         'Goal': c.goal,
@@ -314,17 +306,19 @@ def download_excel_by_type(client_type):
         'Join Date': c.join_date,
         'Due Date': c.payment_due_date,
         'Last Updated': c.last_updated
-    } for c in clients]
+    } for c in clients])
 
     os.makedirs('static/backups', exist_ok=True)
     path = f'static/backups/{client_type}_clients.xlsx'
-    pd.DataFrame(data).to_excel(path, index=False)
+    df.to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
+# App run
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 

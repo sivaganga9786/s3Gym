@@ -196,12 +196,38 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    due = Client.query.filter(
-        Client.payment_due_date >= today,
+    # 🔁 Auto-update status to 'unpaid' if due date is near or passed
+    due_soon_clients = Client.query.filter(
         Client.payment_due_date <= next_3_days
-    ).order_by(Client.payment_due_date).all()
+    ).all()
 
-    return render_template('due_clients.html', clients=due)
+    for client in due_soon_clients:
+        if client.payment_status != 'unpaid':
+            client.payment_status = 'unpaid'
+            client.last_updated = datetime.now()
+
+    db.session.commit()
+
+    # 🎯 Now fetch those clients for display
+    due_clients = Client.query.filter(
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date <= next_3_days
+    ).all()
+
+    return render_template('due_clients.html', clients=due_clients)
+
+@app.route('/mark_paid/<int:client_id>', methods=['POST'])
+def mark_paid(client_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    client = Client.query.get_or_404(client_id)
+    client.payment_status = 'paid'
+    client.last_updated = datetime.now()
+    db.session.commit()
+    flash(f"{client.name} marked as paid.", "success")
+    return redirect(url_for('due_clients'))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -243,6 +269,31 @@ def download_excel_all():
     path = 'static/backups/all_clients.xlsx'
     pd.DataFrame(data).to_excel(path, index=False)
     return send_file(path, as_attachment=True)
+@app.route('/home')
+def home():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+
+    total_clients = Client.query.count()
+    total_students = Client.query.filter_by(client_type='student').count()
+    total_general = Client.query.filter_by(client_type='general').count()
+
+    due_clients_count = Client.query.filter(
+        Client.payment_due_date >= today,
+        Client.payment_due_date <= next_3_days
+    ).count()
+
+    return render_template(
+        'home.html',
+        current_year=datetime.now().year,
+        total_clients=total_clients,
+        total_students=total_students,
+        total_general=total_general,
+        due_clients_count=due_clients_count
+    )
 
 @app.route('/download_excel/<client_type>')
 def download_excel_by_type(client_type):

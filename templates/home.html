@@ -24,6 +24,40 @@
       </div>
     {% endif %}
   </div>
+<div class="row text-center my-4">
+  <div class="col-md-3">
+    <div class="card shadow-sm border-primary">
+      <div class="card-body">
+        <h5 class="text-primary">Total Clients</h5>
+        <h2>{{ total_clients }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-success">
+      <div class="card-body">
+        <h5 class="text-success">Students</h5>
+        <h2>{{ total_students }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-info">
+      <div class="card-body">
+        <h5 class="text-info">General</h5>
+        <h2>{{ total_general }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card shadow-sm border-warning">
+      <div class="card-body">
+        <h5 class="text-warning">Due in 3 Days</h5>
+        <h2>{{ due_clients_count }}</h2>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

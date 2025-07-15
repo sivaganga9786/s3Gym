@@ -43,16 +43,12 @@ def root():
 
 @app.route('/home')
 def home():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('login'))
-
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
     total_clients = Client.query.count()
     total_students = Client.query.filter_by(client_type='student').count()
     total_general = Client.query.filter_by(client_type='general').count()
-
     due_clients_count = Client.query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date <= next_3_days
@@ -67,7 +63,22 @@ def home():
         due_clients_count=due_clients_count
     )
 
-@app.route('/index')  # This is your "paid clients" view
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username'] == 'admin' and request.form['password'] == 'admin123':
+            session['admin_logged_in'] = True
+            return redirect(url_for('home'))
+        flash("Invalid credentials", 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    flash("Logged out", 'info')
+    return redirect(url_for('home'))
+
+@app.route('/index')  # Paid Clients
 def index():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
@@ -96,7 +107,7 @@ def due_clients():
     today = datetime.today().date()
     next_3_days = today + timedelta(days=3)
 
-    # Auto move to unpaid if within due range
+    # Auto mark as unpaid if within due range
     due_soon_clients = Client.query.filter(
         Client.payment_status == 'paid',
         Client.payment_due_date <= next_3_days
@@ -108,7 +119,7 @@ def due_clients():
 
     db.session.commit()
 
-    # Get only unpaid clients within due range
+    # Show unpaid clients
     due_clients = Client.query.filter(
         Client.payment_status == 'unpaid',
         Client.payment_due_date <= next_3_days
@@ -310,6 +321,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(host='0.0.0.0', port=10000)
+
 
 
 # from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file

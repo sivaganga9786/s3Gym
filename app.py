@@ -224,6 +224,32 @@ def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
     return redirect(url_for('home'))
+@app.route('/download_excel_all')
+def download_excel_all():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    clients = Client.query.all()
+    data = [{
+        'Name': c.name,
+        'Contact': c.contact,
+        'Goal': c.goal,
+        'Weight': c.weight,
+        'Gender': c.gender,
+        'Type': c.client_type,
+        'Fees': c.fees,
+        'Payment Status': c.payment_status,
+        'Join Date': c.join_date,
+        'Due Date': c.payment_due_date,
+        'Last Updated': c.last_updated
+    } for c in clients]
+
+    df = pd.DataFrame(data)
+    os.makedirs('static/backups', exist_ok=True)
+    path = 'static/backups/all_clients.xlsx'
+    df.to_excel(path, index=False)
+
+    return send_file(path, as_attachment=True)
 
 if __name__ == '__main__':
     with app.app_context():

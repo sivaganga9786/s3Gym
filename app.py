@@ -224,8 +224,9 @@ def logout():
     session.pop('admin_logged_in', None)
     flash("Logged out", 'info')
     return redirect(url_for('home'))
-@app.route('/download_excel_all')
-def download_excel_all():
+@app.route('/download_excel/<client_type>')
+def download_excel_by_type(client_type):
+    
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 

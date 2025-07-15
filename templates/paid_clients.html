@@ -11,8 +11,7 @@
       <h2>💰 Paid Clients</h2>
       <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>
-
-    <form method="GET" action="{{ url_for('paid_clients') }}" class="input-group mb-3">
+      <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
       <input name="search" placeholder="Search by name" class="form-control" value="{{ query }}">
       <button class="btn btn-primary">Search</button>
     </form>

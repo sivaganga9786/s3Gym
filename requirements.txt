@@ -5,4 +5,5 @@ openpyxl
 werkzeug
 psycopg2-binary
 python-dotenv
+cloudinary==1.34.0
 

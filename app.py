@@ -7,7 +7,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 
-# Flask config
+# Flask configuration
 app = Flask(__name__)
 app.config.update(
     SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL', 'sqlite:///clients.db'),
@@ -24,10 +24,12 @@ cloudinary.config(
 
 db = SQLAlchemy(app)
 
+# Helper
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# DB Model
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
@@ -43,12 +45,19 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(300), nullable=True)
 
+# Root Route
 @app.route('/')
 def root():
     return redirect(url_for('home'))
 
+# Home Route
 @app.route('/home')
 def home():
+    total_clients = 0
+    total_students = 0
+    total_general = 0
+    due_clients_count = 0
+
     if session.get('admin_logged_in'):
         today = datetime.today().date()
         next_3_days = today + timedelta(days=3)
@@ -60,13 +69,9 @@ def home():
             Client.payment_status == 'unpaid',
             Client.payment_due_date <= next_3_days
         ).count()
-    else:
-        total_clients = 0
-        total_students = 0
-        total_general = 0
-        due_clients_count = 0
 
-    return render_template('home.html',
+    return render_template(
+        'home.html',
         current_year=datetime.now().year,
         total_clients=total_clients,
         total_students=total_students,
@@ -74,6 +79,7 @@ def home():
         due_clients_count=due_clients_count
     )
 
+# Login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -89,6 +95,7 @@ def logout():
     flash("Logged out", 'info')
     return redirect(url_for('home'))
 
+# Paid Clients (after login)
 @app.route('/index')
 def index():
     if not session.get('admin_logged_in'):
@@ -299,6 +306,7 @@ def download_excel_by_type(client_type):
     df.to_excel(path, index=False)
     return send_file(path, as_attachment=True)
 
+# Run app
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

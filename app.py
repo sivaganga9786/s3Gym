@@ -53,11 +53,6 @@ def root():
 # Home Route
 @app.route('/home')
 def home():
-    total_clients = 0
-    total_students = 0
-    total_general = 0
-    due_clients_count = 0
-
     if session.get('admin_logged_in'):
         today = datetime.today().date()
         next_3_days = today + timedelta(days=3)
@@ -69,9 +64,13 @@ def home():
             Client.payment_status == 'unpaid',
             Client.payment_due_date <= next_3_days
         ).count()
+    else:
+        total_clients = 0
+        total_students = 0
+        total_general = 0
+        due_clients_count = 0
 
-    return render_template(
-        'home.html',
+    return render_template('home.html',
         current_year=datetime.now().year,
         total_clients=total_clients,
         total_students=total_students,

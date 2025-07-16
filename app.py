@@ -51,32 +51,30 @@ def financial_summary():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
-    month = int(request.args.get('month', datetime.now().month))
-    year = int(request.args.get('year', datetime.now().year))
+    # Get month/year from query or default to current
+    month = int(request.args.get('month', datetime.today().month))
+    year = int(request.args.get('year', datetime.today().year))
 
-    # Calculate revenue by join_date
-    student_total = db.session.query(func.sum(Client.fees)).filter(
-        Client.client_type == 'student',
+    # Only consider paid clients
+    paid_clients = Client.query.filter(
         Client.payment_status == 'paid',
-        extract('month', Client.join_date) == month,
-        extract('year', Client.join_date) == year
-    ).scalar() or 0
+        db.extract('month', Client.join_date) == month,
+        db.extract('year', Client.join_date) == year
+    ).all()
 
-    general_total = db.session.query(func.sum(Client.fees)).filter(
-        Client.client_type == 'general',
-        Client.payment_status == 'paid',
-        extract('month', Client.join_date) == month,
-        extract('year', Client.join_date) == year
-    ).scalar() or 0
+    student_total = sum(c.fees for c in paid_clients if c.client_type == 'student')
+    general_total = sum(c.fees for c in paid_clients if c.client_type == 'general')
+    total_revenue = student_total + general_total
 
     return render_template("financial_summary.html",
         student_total=student_total,
         general_total=general_total,
-        total_revenue=student_total + general_total,
+        total_revenue=total_revenue,
         selected_month=month,
         selected_year=year,
-        current_year=datetime.now().year
+        current_year=datetime.today().year
     )
+
 # Routes
 @app.route('/')
 def root():
@@ -355,7 +353,7 @@ def download_excel_master():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
-    clients = Client.query.order_by(Client.join_date.desc()).all()
+    clients = Client.query.filter_by(payment_status='paid').order_by(Client.join_date.desc()).all()
     df = pd.DataFrame([{
         'Name': c.name,
         'Contact': c.contact,

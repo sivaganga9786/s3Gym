@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📈 Finance Summary</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4 bg-light">
+  <div class="container">
+    <h2 class="mb-4 text-center">📈 Monthly Finance Summary</h2>
+
+    <form method="GET" class="row g-3 mb-4">
+      <div class="col-md-4">
+        <select class="form-select" name="month" required>
+          <option value="">Select Month</option>
+          {% for m in range(1, 13) %}
+            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" name="year" required>
+          <option value="">Select Year</option>
+          {% for y in range(2024, current_year + 1) %}
+            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-primary w-100">View</button>
+      </div>
+    </form>
+
+    <div class="row text-center">
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">🎓 Student Revenue</h5>
+            <h2 class="text-success">₹{{ student_total }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">🏋️ General Revenue</h5>
+            <h2 class="text-info">₹{{ general_total }}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">💰 Total Revenue</h5>
+            <h2 class="text-primary fw-bold">₹{{ total_revenue }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{{ url_for('download_financial_excel', month=selected_month, year=selected_year) }}" class="btn btn-outline-dark">⬇️ Download Excel</a>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary ms-2">🏠 Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>
+
+

@@ -7,7 +7,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 from sqlalchemy import text  # for one-time column addition
-
+from sqlalchemy import extract
 # Flask config
 app = Flask(__name__)
 app.config.update(
@@ -46,7 +46,43 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(300), nullable=True)
     is_active = db.Column(db.Boolean, default=True)  # ✅ Soft delete flag
+@app.route('/finance_summary')
+def finance_summary():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
 
+    today = datetime.today()
+    month = request.args.get('month', today.month, type=int)
+    year = request.args.get('year', today.year, type=int)
+
+    # Filter by join_date month & year
+    students = Client.query.filter(
+        extract('month', Client.join_date) == month,
+        extract('year', Client.join_date) == year,
+        Client.client_type == 'student',
+        Client.payment_status == 'paid',
+        Client.is_active == True
+    ).all()
+
+    generals = Client.query.filter(
+        extract('month', Client.join_date) == month,
+        extract('year', Client.join_date) == year,
+        Client.client_type == 'general',
+        Client.payment_status == 'paid',
+        Client.is_active == True
+    ).all()
+
+    student_total = sum(c.fees for c in students)
+    general_total = sum(c.fees for c in generals)
+    grand_total = student_total + general_total
+
+    return render_template('finance_summary.html',
+        month=month, year=year,
+        students=students, generals=generals,
+        student_total=student_total,
+        general_total=general_total,
+        grand_total=grand_total
+    )
 # Routes
 @app.route('/')
 def root():

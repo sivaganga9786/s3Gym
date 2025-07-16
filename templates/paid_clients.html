@@ -11,21 +11,38 @@
       <h2>💰 Paid Clients</h2>
       <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
     </div>
-      <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
+
+    <form method="GET" action="{{ url_for('index') }}" class="input-group mb-3">
       <input name="search" placeholder="Search by name" class="form-control" value="{{ query }}">
       <button class="btn btn-primary">Search</button>
     </form>
 
-    <table class="table table-bordered table-striped">
-      <thead>
+    <table class="table table-bordered table-striped text-center align-middle">
+      <thead class="table-dark">
         <tr>
-          <th>Name</th><th>Contact</th><th>Goal</th><th>Gender</th><th>Type</th>
-          <th>Fees</th><th>Status</th><th>Join</th><th>Due</th><th>Actions</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Goal</th>
+          <th>Gender</th>
+          <th>Type</th>
+          <th>Fees</th>
+          <th>Status</th>
+          <th>Join</th>
+          <th>Due</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for c in clients %}
         <tr>
+          <td>
+            {% if c.profile_image %}
+              <img src="{{ c.profile_image }}" alt="Profile" width="40" height="40" class="rounded-circle">
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
           <td>{{ c.name }}</td>
           <td>{{ c.contact }}</td>
           <td>{{ c.goal }}</td>
@@ -37,21 +54,20 @@
           <td>{{ c.payment_due_date }}</td>
           <td>
             <a href="{{ url_for('edit_client', client_id=c.id) }}" class="btn btn-sm btn-info">Edit</a>
-            <form method="POST" action="{{ url_for('delete_client', client_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete {{ c.name }}?');">
+            <form method="POST" action="{{ url_for('delete_client', client_id=c.id) }}" class="d-inline" onsubmit="return confirm('Delete {{ c.name }}?');">
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="10" class="text-center text-muted">No paid clients found.</td>
+          <td colspan="11" class="text-muted text-center">No paid clients found.</td>
         </tr>
         {% endfor %}
       </tbody>
-
     </table>
 
-    <div class="mt-3">
+    <div class="mt-3 text-center">
       <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Home</a>
       <a href="{{ url_for('add_client') }}" class="btn btn-success">➕ Register Client</a>
       <a href="{{ url_for('master_list') }}" class="btn btn-dark">📋 Master List</a>
@@ -59,5 +75,6 @@
   </div>
 </body>
 </html>
+
 
 

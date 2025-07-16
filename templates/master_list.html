@@ -7,44 +7,66 @@
 </head>
 <body class="p-4 bg-light">
   <div class="container">
-    <h2 class="mb-4">📋 Master List - All Clients</h2>
 
-    <div class="mb-3">
-      <a href="{{ url_for('download_excel_master') }}" class="btn btn-outline-dark">⬇️ Download Excel</a>
-      <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Home</a>
-      <a href="{{ url_for('due_clients') }}" class="btn btn-warning">⚠️ View Due Clients</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>📋 Master List - All Clients</h2>
+      <div>
+        <a href="{{ url_for('download_excel_master') }}" class="btn btn-outline-dark">⬇️ Download Excel</a>
+        <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Home</a>
+        <a href="{{ url_for('due_clients') }}" class="btn btn-warning">⚠️ View Due Clients</a>
+      </div>
     </div>
 
-    <table class="table table-bordered table-striped">
-      <thead>
+    <table class="table table-bordered table-striped text-center align-middle">
+      <thead class="table-dark">
         <tr>
-          <th>Name</th><th>Contact</th><th>Goal</th><th>Type</th>
-          <th>Fees</th><th>Status</th><th>Join</th><th>Due</th><th>Action</th>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Contact</th>
+          <th>Goal</th>
+          <th>Type</th>
+          <th>Fees</th>
+          <th>Status</th>
+          <th>Join</th>
+          <th>Due</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         {% for c in clients %}
         <tr>
+          <td>
+            {% if c.profile_image %}
+              <img src="{{ c.profile_image }}" alt="Photo" width="40" height="40" class="rounded-circle">
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
           <td>{{ c.name }}</td>
           <td>{{ c.contact }}</td>
           <td>{{ c.goal }}</td>
           <td>{{ c.client_type }}</td>
           <td>{{ c.fees }}</td>
-          <td>{{ c.payment_status }}</td>
+          <td class="{% if c.payment_status == 'paid' %}text-success{% else %}text-danger{% endif %}">
+            {{ c.payment_status }}
+          </td>
           <td>{{ c.join_date }}</td>
           <td>{{ c.payment_due_date }}</td>
           <td>
-            <a href="{{ url_for('edit_client', client_id=c.id) }}" class="btn btn-sm btn-info">Edit</a>
+            <a href="{{ url_for('edit_client', client_id=c.id) }}" class="btn btn-sm btn-info">✏️ Edit</a>
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="9" class="text-center text-muted">No Clients Found</td></tr>
+        <tr>
+          <td colspan="10" class="text-center text-muted">No Clients Found</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </body>
 </html>
+
 
 
 

@@ -77,14 +77,25 @@ def home():
         due_clients_count=due_clients_count
     )
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form['username'] == 'admin' and request.form['password'] == 'admin123':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Securely pull from Render environment
+        admin_user = os.environ["ADMIN_USERNAME"]
+        admin_pass = os.environ["ADMIN_PASSWORD"]
+
+        if username == admin_user and password == admin_pass:
             session['admin_logged_in'] = True
-            return redirect(url_for('index'))
+            return redirect(url_for('home'))
+
         flash("Invalid credentials", 'danger')
+
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():

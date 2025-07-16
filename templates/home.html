@@ -161,21 +161,57 @@
 
 <!-- Admin-only client data section -->
 {% if session.get('admin_logged_in') %}
-  <div class="my-4">
-    <a href="{{ url_for('index') }}" class="btn btn-primary m-2">📋 Paid Clients</a>
-    <a href="{{ url_for('add_client') }}" class="btn btn-success m-2">➕ Register Client</a>
-    <a href="{{ url_for('due_clients') }}" class="btn btn-warning m-2">📅 Due Clients</a>
-    <a href="{{ url_for('master_list') }}" class="btn btn-dark m-2">📚 Master List</a>
+  <!-- Action Buttons Centered -->
+  <div class="text-center my-5">
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="{{ url_for('index') }}" class="btn btn-outline-primary px-4 py-2 shadow">📋 Paid Clients</a>
+      <a href="{{ url_for('add_client') }}" class="btn btn-outline-success px-4 py-2 shadow">➕ Register Client</a>
+      <a href="{{ url_for('due_clients') }}" class="btn btn-outline-warning px-4 py-2 shadow">📅 Due Clients</a>
+      <a href="{{ url_for('master_list') }}" class="btn btn-outline-dark px-4 py-2 shadow">📚 Master List</a>
+    </div>
   </div>
 
-  <!-- ✅ Display Stats -->
-  <div class="container text-center mt-4">
-    <h4>📊 Client Summary</h4>
-    <div class="row justify-content-center mt-3">
-      <div class="col-md-2"><strong>Total:</strong><br>{{ total_clients }}</div>
-      <div class="col-md-2"><strong>Students:</strong><br>{{ total_students }}</div>
-      <div class="col-md-2"><strong>General:</strong><br>{{ total_general }}</div>
-      <div class="col-md-2"><strong>Due:</strong><br>{{ due_clients_count }}</div>
+  <!-- Client Summary Cards -->
+  <div class="container text-center">
+    <h3 class="mb-4">📊 Client Summary</h3>
+    <div class="row justify-content-center g-4">
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">👥 Total Clients</h5>
+            <h2 class="text-primary">{{ total_clients }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">🎓 Students</h5>
+            <h2 class="text-success">{{ total_students }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">🏋️ General</h5>
+            <h2 class="text-info">{{ total_general }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <div class="card shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">⏰ Due Clients</h5>
+            <h2 class="text-danger">{{ due_clients_count }}</h2>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 {% endif %}

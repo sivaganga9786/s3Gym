@@ -2,71 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>📊 Monthly Finance Summary</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <title>📊 Financial Summary</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light p-4">
-
+<body class="p-4 bg-light">
   <div class="container">
-    <h2 class="mb-4">📅 Finance Summary - {{ month }}/{{ year }}</h2>
 
-    <div class="row mb-4">
+    <h2 class="mb-4 text-center">📊 Monthly Financial Summary</h2>
+
+    <!-- 🔽 Month/Year Selector -->
+    <form method="GET" class="row g-3 mb-4 justify-content-center">
+      <div class="col-auto">
+        <select name="month" class="form-select" required>
+          {% for m in range(1, 13) %}
+          <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="year" class="form-select" required>
+          {% for y in range(2023, current_year + 1) %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-primary">🔍 View</button>
+      </div>
+    </form>
+
+    <div class="row justify-content-center g-4">
       <div class="col-md-4">
-        <div class="card text-white bg-primary mb-3">
+        <div class="card shadow text-center border-success">
           <div class="card-body">
             <h5 class="card-title">🎓 Student Revenue</h5>
-            <h3 class="card-text">₹{{ student_total }}</h3>
+            <h3 class="text-success">₹{{ student_total }}</h3>
           </div>
         </div>
       </div>
-
       <div class="col-md-4">
-        <div class="card text-white bg-success mb-3">
+        <div class="card shadow text-center border-info">
           <div class="card-body">
-            <h5 class="card-title">🧑‍💼 General Revenue</h5>
-            <h3 class="card-text">₹{{ general_total }}</h3>
+            <h5 class="card-title">🏋️ General Revenue</h5>
+            <h3 class="text-info">₹{{ general_total }}</h3>
           </div>
         </div>
       </div>
-
       <div class="col-md-4">
-        <div class="card text-white bg-dark mb-3">
+        <div class="card shadow text-center border-dark">
           <div class="card-body">
-            <h5 class="card-title">💰 Grand Total</h5>
-            <h3 class="card-text">₹{{ grand_total }}</h3>
+            <h5 class="card-title">💰 Total Revenue</h5>
+            <h3 class="text-dark fw-bold">₹{{ total_revenue }}</h3>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Student table -->
-    <h4>🎓 Students</h4>
-    <table class="table table-bordered">
-      <thead><tr><th>Name</th><th>Contact</th><th>Fees</th><th>Join Date</th></tr></thead>
-      <tbody>
-        {% for c in students %}
-        <tr><td>{{ c.name }}</td><td>{{ c.contact }}</td><td>{{ c.fees }}</td><td>{{ c.join_date }}</td></tr>
-        {% else %}
-        <tr><td colspan="4" class="text-center text-muted">No student clients</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <!-- 📥 Download -->
+    <div class="text-center mt-5">
+      <a href="{{ url_for('download_financial_excel', month=selected_month, year=selected_year) }}" class="btn btn-outline-dark">
+        ⬇️ Download Excel Report
+      </a>
+    </div>
 
-    <!-- General table -->
-    <h4 class="mt-4">🧑‍💼 General Clients</h4>
-    <table class="table table-bordered">
-      <thead><tr><th>Name</th><th>Contact</th><th>Fees</th><th>Join Date</th></tr></thead>
-      <tbody>
-        {% for c in generals %}
-        <tr><td>{{ c.name }}</td><td>{{ c.contact }}</td><td>{{ c.fees }}</td><td>{{ c.join_date }}</td></tr>
-        {% else %}
-        <tr><td colspan="4" class="text-center text-muted">No general clients</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('home') }}" class="btn btn-secondary">🏠 Back to Home</a>
+    </div>
 
-    <a href="{{ url_for('home') }}" class="btn btn-secondary mt-3">🏠 Home</a>
   </div>
-
 </body>
 </html>
+

@@ -7,7 +7,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 from sqlalchemy import text  # for one-time column addition
-from sqlalchemy import extract
+from sqlalchemy import extract, func
 # Flask config
 app = Flask(__name__)
 app.config.update(
@@ -46,42 +46,36 @@ class Client(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow)
     profile_image = db.Column(db.String(300), nullable=True)
     is_active = db.Column(db.Boolean, default=True)  # ✅ Soft delete flag
-@app.route('/finance_summary')
-def finance_summary():
+@app.route('/financial_summary')
+def financial_summary():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
-    today = datetime.today()
-    month = request.args.get('month', today.month, type=int)
-    year = request.args.get('year', today.year, type=int)
+    month = int(request.args.get('month', datetime.now().month))
+    year = int(request.args.get('year', datetime.now().year))
 
-    # Filter by join_date month & year
-    students = Client.query.filter(
-        extract('month', Client.join_date) == month,
-        extract('year', Client.join_date) == year,
+    # Calculate revenue by join_date
+    student_total = db.session.query(func.sum(Client.fees)).filter(
         Client.client_type == 'student',
         Client.payment_status == 'paid',
-        Client.is_active == True
-    ).all()
-
-    generals = Client.query.filter(
         extract('month', Client.join_date) == month,
-        extract('year', Client.join_date) == year,
+        extract('year', Client.join_date) == year
+    ).scalar() or 0
+
+    general_total = db.session.query(func.sum(Client.fees)).filter(
         Client.client_type == 'general',
         Client.payment_status == 'paid',
-        Client.is_active == True
-    ).all()
+        extract('month', Client.join_date) == month,
+        extract('year', Client.join_date) == year
+    ).scalar() or 0
 
-    student_total = sum(c.fees for c in students)
-    general_total = sum(c.fees for c in generals)
-    grand_total = student_total + general_total
-
-    return render_template('finance_summary.html',
-        month=month, year=year,
-        students=students, generals=generals,
+    return render_template("financial_summary.html",
         student_total=student_total,
         general_total=general_total,
-        grand_total=grand_total
+        total_revenue=student_total + general_total,
+        selected_month=month,
+        selected_year=year,
+        current_year=datetime.now().year
     )
 # Routes
 @app.route('/')
@@ -113,6 +107,51 @@ def home():
         due_clients_count=due_clients_count
     )
 
+@app.route('/download_financial_excel')
+def download_financial_excel():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    month = int(request.args.get('month'))
+    year = int(request.args.get('year'))
+
+    students = Client.query.filter(
+        Client.client_type == 'student',
+        Client.payment_status == 'paid',
+        extract('month', Client.join_date) == month,
+        extract('year', Client.join_date) == year
+    ).all()
+
+    general = Client.query.filter(
+        Client.client_type == 'general',
+        Client.payment_status == 'paid',
+        extract('month', Client.join_date) == month,
+        extract('year', Client.join_date) == year
+    ).all()
+
+    # Prepare Excel content
+    data = []
+    for c in students + general:
+        data.append({
+            'Name': c.name,
+            'Contact': c.contact,
+            'Type': c.client_type,
+            'Fees': c.fees,
+            'Join Date': c.join_date,
+            'Status': c.payment_status
+        })
+
+    df = pd.DataFrame(data)
+
+    # Add summary row
+    total_fees = df['Fees'].sum()
+    df.loc[len(df)] = ['TOTAL', '', '', total_fees, '', '']
+
+    os.makedirs('static/reports', exist_ok=True)
+    filename = f'static/reports/Financial_{month}_{year}.xlsx'
+    df.to_excel(filename, index=False)
+
+    return send_file(filename, as_attachment=True)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -363,6 +402,39 @@ def download_excel_by_type(client_type):
     os.makedirs('static/backups', exist_ok=True)
     path = f'static/backups/{client_type}_clients.xlsx'
     df.to_excel(path, index=False)
+    return send_file(path, as_attachment=True)
+
+@app.route('/download_due_excel')
+def download_due_excel():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('login'))
+
+    today = datetime.today().date()
+    next_3_days = today + timedelta(days=3)
+
+    due_clients = Client.query.filter(
+        Client.payment_status == 'unpaid',
+        Client.payment_due_date <= next_3_days
+    ).all()
+
+    data = []
+    for c in due_clients:
+        data.append({
+            'Name': c.name,
+            'Contact': c.contact,
+            'Type': c.client_type,
+            'Join Date': c.join_date,
+            'Due Date': c.payment_due_date,
+            'Status': c.payment_status
+        })
+
+    df = pd.DataFrame(data)
+    df.loc[len(df)] = ['TOTAL', '', '', '', '', f'{len(due_clients)} Clients']
+
+    os.makedirs('static/reports', exist_ok=True)
+    path = f'static/reports/Due_Clients_{today}.xlsx'
+    df.to_excel(path, index=False)
+
     return send_file(path, as_attachment=True)
 
 # App entry

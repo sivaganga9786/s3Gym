@@ -8,6 +8,7 @@ import cloudinary
 import cloudinary.uploader
 from sqlalchemy import text  # for one-time column addition
 from sqlalchemy import extract, func
+from flask import request
 # Flask config
 app = Flask(__name__)
 app.config.update(
@@ -51,28 +52,27 @@ def financial_summary():
     if not session.get('admin_logged_in'):
         return redirect(url_for('login'))
 
-    # Get month/year from query or default to current
-    month = int(request.args.get('month', datetime.today().month))
-    year = int(request.args.get('year', datetime.today().year))
+    selected_month = int(request.args.get("month", datetime.now().month))
+    selected_year = int(request.args.get("year", datetime.now().year))
 
-    # Only consider paid clients
-    paid_clients = Client.query.filter(
+    # Filter paid clients only for the selected month/year
+    clients = Client.query.filter(
         Client.payment_status == 'paid',
-        db.extract('month', Client.join_date) == month,
-        db.extract('year', Client.join_date) == year
+        db.extract('month', Client.join_date) == selected_month,
+        db.extract('year', Client.join_date) == selected_year
     ).all()
 
-    student_total = sum(c.fees for c in paid_clients if c.client_type == 'student')
-    general_total = sum(c.fees for c in paid_clients if c.client_type == 'general')
+    student_total = sum(c.fees for c in clients if c.client_type == "student")
+    general_total = sum(c.fees for c in clients if c.client_type == "general")
     total_revenue = student_total + general_total
 
     return render_template("financial_summary.html",
         student_total=student_total,
         general_total=general_total,
         total_revenue=total_revenue,
-        selected_month=month,
-        selected_year=year,
-        current_year=datetime.today().year
+        selected_month=selected_month,
+        selected_year=selected_year,
+        current_year=datetime.now().year
     )
 
 # Routes

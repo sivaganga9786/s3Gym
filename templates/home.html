@@ -320,24 +320,22 @@
 <span id="client-count" data-total="{{ total_clients }}" style="display:none;"></span>
 <span id="members" data-count="0">0+</span>
 <span id="trainers" data-count="3">0+</span>
-
 <script>
-  // Animate counts (for public view)
+  // ===== SET THESE VALUES =====
+  const totalClients = 0; // Replace with actual client count dynamically
+  const totalTrainers = 3; // This is fixed
+
+  // Display actual total values
   const membersElem = document.getElementById("members");
   const trainersElem = document.getElementById("trainers");
 
-  const membersCount = parseInt(membersElem?.dataset.count || "0", 10);
-  const trainersCount = parseInt(trainersElem?.dataset.count || "0", 10);
+  if (membersElem) membersElem.textContent = totalClients + (totalClients > 0 ? "+" : "");
+  if (trainersElem) trainersElem.textContent = totalTrainers;
 
-  animateValue("members", 0, membersCount, 1000);
-  animateValue("trainers", 0, trainersCount, 1000);
-
+  // Optional: Only animate if client count > 0
   function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
-    if (!obj || end <= 0) {
-      if (obj) obj.textContent = "0";
-      return;
-    }
+    if (!obj) return;
     let current = start;
     const stepTime = Math.abs(Math.floor(duration / (end - start)));
     const timer = setInterval(() => {
@@ -347,14 +345,20 @@
     }, stepTime);
   }
 
-  // Dark mode toggle
-  const toggleBtn = document.getElementById('toggleTheme');
-  toggleBtn?.addEventListener('click', () => {
-    const html = document.documentElement;
-    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-  });
+  if (totalClients > 0) {
+    animateValue("members", 0, totalClients, 1000);
+  }
 
-  // Rotating quotes (shown when admin is logged in)
+  // ======= Dark mode toggle =========
+  const toggleBtn = document.getElementById('toggleTheme');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    });
+  }
+
+  // ======= Rotating quotes =========
   const quotes = [
     "“Push yourself, because no one else is going to do it for you.”",
     "“The only bad workout is the one that didn’t happen.”",
@@ -370,6 +374,7 @@
     }, 5000);
   }
 </script>
+
 
 
 </body>

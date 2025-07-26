@@ -277,7 +277,7 @@
 </footer>
 
 <!-- Scripts -->
-<script>
+<!-- <script>
   // Animate counts (for public view)
   animateValue("members", 0, 30, 1000);
   animateValue("trainers", 0, 3, 1000);
@@ -300,6 +300,54 @@
     const html = document.documentElement;
     html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
   });
+
+  // Rotating quotes (shown when admin is logged in)
+  const quotes = [
+    "“Push yourself, because no one else is going to do it for you.”",
+    "“The only bad workout is the one that didn’t happen.”",
+    "“Fitness is not about being better than someone else. It’s about being better than you used to be.”",
+    "“Don’t limit your challenges. Challenge your limits.”"
+  ];
+  const quoteElem = document.getElementById("rotating-quote");
+  if (quoteElem) {
+    let i = 0;
+    setInterval(() => {
+      quoteElem.textContent = "💡 " + quotes[i];
+      i = (i + 1) % quotes.length;
+    }, 5000);
+  }
+</script> -->
+<span id="client-count" data-total="{{ total_clients }}" style="display:none;"></span>
+
+<script>
+  // Get total clients from hidden span
+  const clientCountElem = document.getElementById("client-count");
+  const totalClients = clientCountElem ? parseInt(clientCountElem.dataset.total) : 0;
+
+  // Animate counts (for public view)
+  animateValue("members", 0, totalClients, 1000);
+  animateValue("trainers", 0, 3, 1000);
+
+  function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    if (!obj) return;
+    let current = start;
+    const stepTime = Math.abs(Math.floor(duration / Math.max(1, end - start)));
+    const timer = setInterval(() => {
+      current++;
+      obj.textContent = current + "+";
+      if (current >= end) clearInterval(timer);
+    }, stepTime);
+  }
+
+  // Dark mode toggle
+  const toggleBtn = document.getElementById('toggleTheme');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    });
+  }
 
   // Rotating quotes (shown when admin is logged in)
   const quotes = [

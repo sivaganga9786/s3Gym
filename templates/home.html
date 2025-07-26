@@ -318,21 +318,28 @@
   }
 </script> -->
 <span id="client-count" data-total="{{ total_clients }}" style="display:none;"></span>
+<span id="members" data-count="0">0+</span>
+<span id="trainers" data-count="3">0+</span>
 
 <script>
-  // Get total clients from hidden span
-  const clientCountElem = document.getElementById("client-count");
-  const totalClients = clientCountElem ? parseInt(clientCountElem.dataset.total) : 0;
-
   // Animate counts (for public view)
-  animateValue("members", 0, totalClients, 1000);
-  animateValue("trainers", 0, 3, 1000);
+  const membersElem = document.getElementById("members");
+  const trainersElem = document.getElementById("trainers");
+
+  const membersCount = parseInt(membersElem?.dataset.count || "0", 10);
+  const trainersCount = parseInt(trainersElem?.dataset.count || "0", 10);
+
+  animateValue("members", 0, membersCount, 1000);
+  animateValue("trainers", 0, trainersCount, 1000);
 
   function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
-    if (!obj) return;
+    if (!obj || end <= 0) {
+      if (obj) obj.textContent = "0";
+      return;
+    }
     let current = start;
-    const stepTime = Math.abs(Math.floor(duration / Math.max(1, end - start)));
+    const stepTime = Math.abs(Math.floor(duration / (end - start)));
     const timer = setInterval(() => {
       current++;
       obj.textContent = current + "+";
@@ -342,12 +349,10 @@
 
   // Dark mode toggle
   const toggleBtn = document.getElementById('toggleTheme');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const html = document.documentElement;
-      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-    });
-  }
+  toggleBtn?.addEventListener('click', () => {
+    const html = document.documentElement;
+    html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  });
 
   // Rotating quotes (shown when admin is logged in)
   const quotes = [
@@ -365,6 +370,7 @@
     }, 5000);
   }
 </script>
+
 
 </body>
 </html>

@@ -321,18 +321,26 @@
 <span id="members" data-count="0">0+</span>
 <span id="trainers" data-count="3">0+</span>
 <script>
-  // ===== SET THESE VALUES =====
-  const totalClients = 0; // Replace with actual client count dynamically
-  const totalTrainers = 3; // This is fixed
-
-  // Display actual total values
+  // ✅ Pull real data from Flask using data attributes
   const membersElem = document.getElementById("members");
   const trainersElem = document.getElementById("trainers");
 
-  if (membersElem) membersElem.textContent = totalClients + (totalClients > 0 ? "+" : "");
-  if (trainersElem) trainersElem.textContent = totalTrainers;
+  const totalClients = parseInt(document.getElementById("client-count")?.dataset.total || "0");
+  const totalTrainers = parseInt(trainersElem?.dataset.count || "3");
 
-  // Optional: Only animate if client count > 0
+  // ✅ Display correct values
+  if (membersElem) {
+    if (totalClients > 0) {
+      animateValue("members", 0, totalClients, 1000);
+    } else {
+      membersElem.textContent = "0+";
+    }
+  }
+
+  if (trainersElem) {
+    trainersElem.textContent = totalTrainers;
+  }
+
   function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -345,11 +353,7 @@
     }, stepTime);
   }
 
-  if (totalClients > 0) {
-    animateValue("members", 0, totalClients, 1000);
-  }
-
-  // ======= Dark mode toggle =========
+  // ✅ Dark mode toggle
   const toggleBtn = document.getElementById('toggleTheme');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -358,7 +362,7 @@
     });
   }
 
-  // ======= Rotating quotes =========
+  // ✅ Rotating quotes (for admin only)
   const quotes = [
     "“Push yourself, because no one else is going to do it for you.”",
     "“The only bad workout is the one that didn’t happen.”",
@@ -374,6 +378,7 @@
     }, 5000);
   }
 </script>
+
 
 
 

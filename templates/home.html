@@ -105,12 +105,20 @@
   </style>
 </head>
 <body class="p-4">
-
+  <header>
+    <img src="{{ url_for('static', filename='images/IMG_3505.jpg') }}" alt="S3 Gym Logo" class="header-img" />
+    <div class="header-overlay">
+      <div>
+        <h1>S3 GYM</h1>
+        <p>Strong & Separate – Fitness that Transforms</p>
+      </div>
+    </div>
+  </header>
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <a class="navbar-brand" href="{{ url_for('home') }}">
+  <!-- <a class="navbar-brand" href="{{ url_for('home') }}">
     <img src="{{ url_for('static', filename='images/IMG_3505.jpg') }}" alt="Gym Logo" height="80">
-  </a>
+  </a> -->
 
   {% if session.get('admin_logged_in') %}
     <!-- Rotating quote shown only if logged in -->
@@ -204,7 +212,7 @@
     <img src="{{ url_for('static', filename='images/IMG_3542.jpg') }}" alt="Equipment 8">
     <img src="{{ url_for('static', filename='images/IMG_3543.jpg') }}" alt="Equipment 9">
     <img src="{{ url_for('static', filename='images/IMG_3546.jpg') }}" alt="Equipment 10">
-    <img src="{{ url_for('static', filename='images/IMG_3603.jpg') }}" alt="Equipment 11">
+    <img src="{{ url_for('static', filename='images/IMG_3605.jpg') }}" alt="Equipment 11">
     <img src="{{ url_for('static', filename='images/IMG_3611.jpg') }}" alt="Equipment 12">
   </div>
 {% endif %}

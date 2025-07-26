@@ -321,63 +321,26 @@
 <span id="members" data-count="0">0+</span>
 <span id="trainers" data-count="3">0+</span>
 <script>
-  // ✅ Pull real data from Flask using data attributes
-  const membersElem = document.getElementById("members");
-  const trainersElem = document.getElementById("trainers");
+  // Initialize values from Jinja (Python-rendered)
+  const membersCount = parseInt("{{ total_clients }}") || 0;
+  const trainersCount = 3;  // Fixed value
 
-  const totalClients = parseInt(document.getElementById("client-count")?.dataset.total || "0");
-  const totalTrainers = parseInt(trainersElem?.dataset.count || "3");
-
-  // ✅ Display correct values
-  if (membersElem) {
-    if (totalClients > 0) {
-      animateValue("members", 0, totalClients, 1000);
-    } else {
-      membersElem.textContent = "0+";
-    }
-  }
-
-  if (trainersElem) {
-    trainersElem.textContent = totalTrainers;
-  }
+  animateValue("members", 0, membersCount, 1000);
+  animateValue("trainers", 0, trainersCount, 1000);
 
   function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
     let current = start;
-    const stepTime = Math.abs(Math.floor(duration / (end - start)));
+    const stepTime = Math.abs(Math.floor(duration / (end - start || 1)));
     const timer = setInterval(() => {
       current++;
       obj.textContent = current + "+";
       if (current >= end) clearInterval(timer);
     }, stepTime);
   }
-
-  // ✅ Dark mode toggle
-  const toggleBtn = document.getElementById('toggleTheme');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      const html = document.documentElement;
-      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-    });
-  }
-
-  // ✅ Rotating quotes (for admin only)
-  const quotes = [
-    "“Push yourself, because no one else is going to do it for you.”",
-    "“The only bad workout is the one that didn’t happen.”",
-    "“Fitness is not about being better than someone else. It’s about being better than you used to be.”",
-    "“Don’t limit your challenges. Challenge your limits.”"
-  ];
-  const quoteElem = document.getElementById("rotating-quote");
-  if (quoteElem) {
-    let i = 0;
-    setInterval(() => {
-      quoteElem.textContent = "💡 " + quotes[i];
-      i = (i + 1) % quotes.length;
-    }, 5000);
-  }
 </script>
+
 
 
 

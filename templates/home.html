@@ -105,20 +105,12 @@
   </style>
 </head>
 <body class="p-4">
-  <header>
-    <img src="{{ url_for('static', filename='images/IMG_3505.jpg') }}" alt="S3 Gym Logo" class="header-img" />
-    <div class="header-overlay">
-      <div>
-        <h1>S3 GYM</h1>
-        <p>Strong & Separate – Fitness that Transforms</p>
-      </div>
-    </div>
-  </header>
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <!-- <a class="navbar-brand" href="{{ url_for('home') }}">
-    <img src="{{ url_for('static', filename='images/IMG_3505.jpg') }}" alt="Gym Logo" height="80">
-  </a> -->
+  <a class="navbar-brand d-flex align-items-center" href="{{ url_for('home') }}">
+    <img src="{{ url_for('static', filename='images/IMG_3505.jpg') }}" alt="Gym Logo" height="50" class="me-2 rounded" />
+    <span class="fw-bold">S3 GYM</span>
+  </a>
 
   {% if session.get('admin_logged_in') %}
     <!-- Rotating quote shown only if logged in -->

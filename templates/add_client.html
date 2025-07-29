@@ -118,59 +118,95 @@
     </div>
   </div>
 
-  <script>
-    const strengthOnlyFees = {
-      student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
-      general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
-    };
+<script>
+  const strengthOnlyFees = {
+    student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
+    general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
+  };
 
-    const strengthCardioFees = {
-      student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
-      general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
-    };
+  const strengthCardioFees = {
+    student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
+    general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
+  };
 
-    function setDue() {
-      const jd = document.getElementById('join_date').value;
-      if (jd) {
-        const d = new Date(jd);
-        d.setDate(d.getDate() + 30);
-        document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
+  const phoneNumbers = ["9876543210", "9123456780"]; // Replace with backend lookup in production
+
+  function setDue() {
+    const jd = document.getElementById('join_date').value;
+    if (jd) {
+      const d = new Date(jd);
+      d.setDate(d.getDate() + 30);
+      document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
+    }
+  }
+
+  function calcFee(autoSelect = false) {
+    const type = document.getElementById('clientType').value;
+    const goal = document.getElementById('goalSelect').value;
+    const periodSelect = document.getElementById('enrollmentPeriod');
+    let duration = parseInt(periodSelect.value);
+
+    let fee = 0;
+
+    if (goal === "personal_training") {
+      fee = 5000;
+      if (autoSelect) {
+        periodSelect.value = "1";
+        duration = 1;
       }
+    } else if (goal === "strength_cardio") {
+      if (autoSelect) autoSelectBestDuration(strengthCardioFees[type], periodSelect);
+      fee = strengthCardioFees[type]?.[duration] || 0;
+    } else {
+      if (autoSelect) autoSelectBestDuration(strengthOnlyFees[type], periodSelect);
+      fee = strengthOnlyFees[type]?.[duration] || 0;
     }
 
-    function calcFee() {
-      const type = document.getElementById('clientType').value;
-      const goal = document.getElementById('goalSelect').value;
-      const duration = parseInt(document.getElementById('enrollmentPeriod').value);
+    document.getElementById('fees').value = fee || '';
+  }
 
-      let fee = 0;
-
-      if (goal === "personal_training") {
-        fee = 5000;
-      } else if (goal === "strength_cardio") {
-        if (strengthCardioFees[type] && strengthCardioFees[type][duration]) {
-          fee = strengthCardioFees[type][duration];
-        }
-      } else {
-        if (strengthOnlyFees[type] && strengthOnlyFees[type][duration]) {
-          fee = strengthOnlyFees[type][duration];
-        }
-      }
-
-      document.getElementById('fees').value = fee || '';
+  function autoSelectBestDuration(feeStructure, periodSelect) {
+    // Default to 1 month if 1 exists, else the lowest duration
+    const durations = Object.keys(feeStructure || {}).map(Number).sort((a, b) => a - b);
+    if (durations.length > 0) {
+      periodSelect.value = durations[0];
     }
+  }
 
-    function preview(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.getElementById('imagePreview');
-          img.src = e.target.result;
-          img.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
+  function preview(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById('imagePreview');
+        img.src = e.target.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
     }
-  </script>
+  }
+
+  function checkPhoneExists() {
+    const phone = document.getElementById('phone').value;
+    if (phoneNumbers.includes(phone)) {
+      alert("Phone number already exists. No data updated.");
+      return false; // prevent form submission or update
+    }
+    return true;
+  }
+
+  // Callbacks
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('goalSelect').addEventListener('change', () => calcFee(true));
+    document.getElementById('clientType').addEventListener('change', () => calcFee());
+    document.getElementById('enrollmentPeriod').addEventListener('change', () => calcFee());
+
+    // Optional: add blur event for phone number
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+      phoneInput.addEventListener('blur', checkPhoneExists);
+    }
+  });
+</script>
+
 </body>
 </html>

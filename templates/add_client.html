@@ -1,92 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Register Client</title>
+  <meta charset="UTF-8" />
+  <title>New Client Registration</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <style>
-    .input-group { margin: 10px 0; }
     .tab {
       display: inline-block;
-      padding: 5px 10px;
-      margin: 0 5px;
-      border: 1px solid #aaa;
+      padding: 8px 16px;
+      margin: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
       cursor: pointer;
     }
     .tab.active {
-      background-color: #28a745;
+      background-color: #0d6efd;
       color: white;
     }
   </style>
 </head>
-<body>
+<body class="p-4 bg-light">
 
-  <h2>Register Client</h2>
-
-  <form id="clientForm">
-    <div class="input-group">
-      <label>Client Name:</label>
-      <input type="text" id="clientName" required>
-    </div>
-
-    <div class="input-group">
-      <label>Phone Number:</label>
-      <input type="text" id="phone" required>
-    </div>
-
-    <div class="input-group">
-      <label>Member Type:</label>
-      <select id="memberType">
-        <option value="student">Student</option>
-        <option value="general">General</option>
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label>Goal:</label>
-      <select id="goal">
-        <option value="strength">Only Strength</option>
-        <option value="strength_cardio">Strength + Cardio</option>
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label>PT Offer:</label>
-      <select id="ptOffer">
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
-      </select>
-    </div>
-
-    <div class="input-group" id="ptFeeGroup" style="display: none;">
-      <label>PT Fee (Manual Entry):</label>
-      <input type="number" id="ptFee" placeholder="Enter PT fee">
-    </div>
-
-    <div class="input-group">
-      <label>Choose Duration:</label>
-      <div id="durationTabs">
-        <span class="tab" data-months="1">1 Month</span>
-        <span class="tab" data-months="3">3 Months</span>
-        <span class="tab" data-months="6">6 Months</span>
-        <span class="tab" data-months="12">1 Year</span>
+  <div class="container bg-white p-4 rounded shadow">
+    <h3 class="mb-4">New Client Registration</h3>
+    <form id="clientForm">
+      <div class="row mb-3">
+        <div class="col">
+          <label for="clientName" class="form-label">Name</label>
+          <input type="text" id="clientName" class="form-control" required>
+        </div>
+        <div class="col">
+          <label for="phone" class="form-label">Contact</label>
+          <input type="text" id="phone" class="form-control" required>
+        </div>
       </div>
-    </div>
 
-    <div class="input-group">
-      <label>Total Fee:</label>
-      <input type="text" id="totalFee" readonly>
-    </div>
+      <div class="row mb-3">
+        <div class="col">
+          <label for="goal" class="form-label">Goal</label>
+          <select id="goal" class="form-select">
+            <option value="">Select</option>
+            <option value="strength">Only Strength</option>
+            <option value="strength_cardio">Strength + Cardio</option>
+            <option value="personal_training">Personal Training</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="memberType" class="form-label">Type</label>
+          <select id="memberType" class="form-select">
+            <option value="student">Student</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="ptOffer" class="form-label">PT Offer</label>
+          <select id="ptOffer" class="form-select">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
 
-    <button type="submit">Submit</button>
-  </form>
+      <div class="mb-3" id="ptFeeGroup" style="display: none;">
+        <label for="ptFee" class="form-label">PT Fee (Manual Entry)</label>
+        <input type="number" id="ptFee" class="form-control" placeholder="Enter PT fee">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Choose Duration</label>
+        <div id="durationTabs">
+          <span class="tab" data-months="1">1 Month</span>
+          <span class="tab" data-months="3">3 Months</span>
+          <span class="tab" data-months="6">6 Months</span>
+          <span class="tab" data-months="12">1 Year</span>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Monthly Fee (₹)</label>
+        <input type="text" id="totalFee" class="form-control" readonly>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col">
+          <label for="join_date" class="form-label">Join Date</label>
+          <input type="date" id="join_date" class="form-control" onchange="setDue()" required>
+        </div>
+        <div class="col">
+          <label for="due_date" class="form-label">Due Date</label>
+          <input type="date" id="payment_due_date" class="form-control" readonly>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="image" class="form-label">Profile Image</label>
+        <input type="file" class="form-control" id="image" onchange="preview(this)">
+        <img id="imagePreview" src="#" alt="Preview" style="display:none; max-width:100px; margin-top:10px;">
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
 
   <script>
-    const feeTableStrengthOnly = {
+    const strengthOnlyFees = {
       student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
       general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
     };
 
-    const feeTableStrengthCardio = {
+    const strengthCardioFees = {
       student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
       general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
     };
@@ -94,10 +118,10 @@
     let selectedMonths = 1;
 
     const durationTabs = document.querySelectorAll('.tab');
-    const totalFeeInput = document.getElementById('totalFee');
     const ptOffer = document.getElementById('ptOffer');
     const ptFeeGroup = document.getElementById('ptFeeGroup');
     const ptFeeInput = document.getElementById('ptFee');
+    const totalFeeInput = document.getElementById('totalFee');
 
     durationTabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -118,43 +142,62 @@
     ptFeeInput.addEventListener('input', calculateFee);
 
     function calculateFee() {
-      const memberType = document.getElementById('memberType').value;
+      const type = document.getElementById('memberType').value;
       const goal = document.getElementById('goal').value;
-      let baseFee = 0;
+      let fee = 0;
 
-      if (goal === 'strength_cardio') {
-        baseFee = feeTableStrengthCardio[memberType][selectedMonths];
+      if (goal === 'personal_training') {
+        fee = ptOffer.value === 'yes' ? parseInt(ptFeeInput.value) || 0 : 5000;
+      } else if (goal === 'strength_cardio') {
+        fee = strengthCardioFees[type]?.[selectedMonths] || 0;
       } else {
-        baseFee = feeTableStrengthOnly[memberType][selectedMonths];
+        fee = strengthOnlyFees[type]?.[selectedMonths] || 0;
       }
 
-      let ptFee = 0;
-      if (ptOffer.value === 'yes' && ptFeeInput.value) {
-        ptFee = parseInt(ptFeeInput.value);
+      if (goal !== 'personal_training' && ptOffer.value === 'yes') {
+        fee += parseInt(ptFeeInput.value) || 0;
       }
 
-      totalFeeInput.value = baseFee + ptFee;
+      totalFeeInput.value = fee;
     }
 
-    // Default tab selection
-    durationTabs[0].click();
+    function setDue() {
+      const jd = document.getElementById('join_date').value;
+      if (jd) {
+        const d = new Date(jd);
+        d.setDate(d.getDate() + 30);
+        document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
+      }
+    }
 
-    // Prevent duplicate phone numbers (for demo use only)
-    const existingPhones = ["9876543210", "1234567890"]; // Simulate existing numbers
+    function preview(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.getElementById('imagePreview');
+          img.src = e.target.result;
+          img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    const existingPhones = ["9876543210", "1234567890"]; // Simulated check
 
     document.getElementById('clientForm').addEventListener('submit', function (e) {
       e.preventDefault();
       const phone = document.getElementById('phone').value.trim();
-
       if (existingPhones.includes(phone)) {
         alert("Phone number already exists. No data updated.");
         return;
       }
-
-      // Add form submission logic here
       alert("Form submitted successfully!");
     });
+
+    // Default tab selection
+    durationTabs[0].click();
   </script>
 </body>
 </html>
+
 

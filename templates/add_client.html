@@ -129,8 +129,6 @@
     general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
   };
 
-  const phoneNumbers = ["9876543210", "9123456780"]; // Replace with backend lookup in production
-
   function setDue() {
     const jd = document.getElementById('join_date').value;
     if (jd) {
@@ -140,37 +138,38 @@
     }
   }
 
-  function calcFee(autoSelect = false) {
+  function togglePTOffer() {
+    const goal = document.getElementById('goalSelect').value;
+    const ptOfferDiv = document.getElementById('ptOfferDiv');
+    if (goal === 'personal_training') {
+      ptOfferDiv.style.display = 'block';
+    } else {
+      ptOfferDiv.style.display = 'none';
+    }
+    calcFee(); // recalculate on goal change
+  }
+
+  function calcFee() {
     const type = document.getElementById('clientType').value;
     const goal = document.getElementById('goalSelect').value;
-    const periodSelect = document.getElementById('enrollmentPeriod');
-    let duration = parseInt(periodSelect.value);
-
+    const duration = parseInt(document.getElementById('enrollmentPeriod').value);
+    const ptOfferInput = document.getElementById('ptOffer');
     let fee = 0;
 
     if (goal === "personal_training") {
-      fee = 5000;
-      if (autoSelect) {
-        periodSelect.value = "1";
-        duration = 1;
-      }
+      const ptOfferVal = parseInt(ptOfferInput.value);
+      fee = isNaN(ptOfferVal) ? 5000 : ptOfferVal;
     } else if (goal === "strength_cardio") {
-      if (autoSelect) autoSelectBestDuration(strengthCardioFees[type], periodSelect);
-      fee = strengthCardioFees[type]?.[duration] || 0;
+      if (strengthCardioFees[type] && strengthCardioFees[type][duration]) {
+        fee = strengthCardioFees[type][duration];
+      }
     } else {
-      if (autoSelect) autoSelectBestDuration(strengthOnlyFees[type], periodSelect);
-      fee = strengthOnlyFees[type]?.[duration] || 0;
+      if (strengthOnlyFees[type] && strengthOnlyFees[type][duration]) {
+        fee = strengthOnlyFees[type][duration];
+      }
     }
 
     document.getElementById('fees').value = fee || '';
-  }
-
-  function autoSelectBestDuration(feeStructure, periodSelect) {
-    // Default to 1 month if 1 exists, else the lowest duration
-    const durations = Object.keys(feeStructure || {}).map(Number).sort((a, b) => a - b);
-    if (durations.length > 0) {
-      periodSelect.value = durations[0];
-    }
   }
 
   function preview(input) {
@@ -184,29 +183,8 @@
       reader.readAsDataURL(input.files[0]);
     }
   }
-
-  function checkPhoneExists() {
-    const phone = document.getElementById('phone').value;
-    if (phoneNumbers.includes(phone)) {
-      alert("Phone number already exists. No data updated.");
-      return false; // prevent form submission or update
-    }
-    return true;
-  }
-
-  // Callbacks
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('goalSelect').addEventListener('change', () => calcFee(true));
-    document.getElementById('clientType').addEventListener('change', () => calcFee());
-    document.getElementById('enrollmentPeriod').addEventListener('change', () => calcFee());
-
-    // Optional: add blur event for phone number
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-      phoneInput.addEventListener('blur', checkPhoneExists);
-    }
-  });
 </script>
+
 
 </body>
 </html>

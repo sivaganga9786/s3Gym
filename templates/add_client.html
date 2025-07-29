@@ -22,7 +22,7 @@
 <body class="p-4 bg-light">
 
   <div class="container bg-white p-4 rounded shadow">
-    <h3 class="mb-4">New Client Registration</h3>
+    <h2 class="card-title text-center">New Client Registration</h2>
     <form id="clientForm">
       <div class="row mb-3">
         <div class="col">
@@ -59,6 +59,10 @@
             <option value="yes">Yes</option>
           </select>
         </div>
+        <div class="col-md-4 mb-3">
+              <label>Weight (kg)</label>
+              <input name="weight" type="number" class="form-control" step="0.1" min="40" max="110" required>
+          </div>
       </div>
 
       <div class="mb-3" id="ptFeeGroup" style="display: none;">
@@ -91,7 +95,14 @@
           <input type="date" id="payment_due_date" class="form-control" readonly>
         </div>
       </div>
-
+      <div class="mb-3">
+            <label>Payment Status</label>
+            <select name="payment_status" class="form-select" required>
+              <option value="">Select</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+            </select>
+        </div>
       <div class="mb-3">
         <label for="image" class="form-label">Profile Image</label>
         <input type="file" class="form-control" id="image" onchange="preview(this)">
@@ -183,10 +194,18 @@
     }
   }
 
-  // ✅ Replace static check with backend call
+  // ✅ Handle phone check and form validation
   document.getElementById('clientForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const phone = phoneInput.value.trim();
+    const weight = document.getElementById('weight').value.trim();
+    const paymentStatus = document.getElementById('payment_status').value;
+
+    // Optional: Validate required fields
+    if (!phone || !weight || !paymentStatus) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
     fetch(`/check_phone/${phone}`)
       .then(response => response.json())
@@ -194,9 +213,8 @@
         if (data.exists) {
           alert("Phone number already exists. No data updated.");
         } else {
-          // Submit the form manually (or via AJAX if needed)
-          alert("Form submitted successfully!");
-          // this.submit(); // Optional: if using regular form post
+          // ✅ Submit the form
+          this.submit();
         }
       })
       .catch(error => {

@@ -101,6 +101,13 @@ def root():
 def check_phone(phone_number):
     existing_client = Client.query.filter_by(phone=phone_number).first()
     return jsonify({'exists': existing_client is not None})
+
+@app.route("/addclient")
+def add_client():
+    # Fetch existing phone numbers from DB
+    phones = [client.phone for client in Client.query.all()]
+    return render_template("addclients.html", existing_phones=phones)
+
 @app.route('/home')
 def home():
     if session.get('admin_logged_in'):

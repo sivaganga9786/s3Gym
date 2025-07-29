@@ -100,8 +100,7 @@ def root():
 
 @app.route('/check_phone/<phone>')
 def check_phone(phone):
-    # Replace this with real logic to check if the phone number exists in the database
-    exists = db.session.query(Client).filter_by(phone=phone).first() is not None
+    exists = db.session.query(Client).filter_by(contact=phone).first() is not None
     return jsonify({"exists": exists})
 
 @app.route('/home')

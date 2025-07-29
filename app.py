@@ -97,7 +97,10 @@ def financial_summary():
 @app.route('/')
 def root():
     return redirect(url_for('home'))
-
+@app.route('/check_phone/<phone_number>')
+def check_phone(phone_number):
+    existing_client = Client.query.filter_by(phone=phone_number).first()
+    return jsonify({'exists': existing_client is not None})
 @app.route('/home')
 def home():
     if session.get('admin_logged_in'):

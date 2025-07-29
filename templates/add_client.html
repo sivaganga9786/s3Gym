@@ -104,99 +104,111 @@
     </form>
   </div>
 
-  <script>
-    const strengthOnlyFees = {
-      student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
-      general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
-    };
+<script>
+  const strengthOnlyFees = {
+    student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
+    general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
+  };
 
-    const strengthCardioFees = {
-      student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
-      general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
-    };
+  const strengthCardioFees = {
+    student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
+    general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
+  };
 
-    let selectedMonths = 1;
+  let selectedMonths = 1;
 
-    const durationTabs = document.querySelectorAll('.tab');
-    const ptOffer = document.getElementById('ptOffer');
-    const ptFeeGroup = document.getElementById('ptFeeGroup');
-    const ptFeeInput = document.getElementById('ptFee');
-    const totalFeeInput = document.getElementById('totalFee');
+  const durationTabs = document.querySelectorAll('.tab');
+  const ptOffer = document.getElementById('ptOffer');
+  const ptFeeGroup = document.getElementById('ptFeeGroup');
+  const ptFeeInput = document.getElementById('ptFee');
+  const totalFeeInput = document.getElementById('totalFee');
+  const phoneInput = document.getElementById('phone');
 
-    durationTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        durationTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        selectedMonths = parseInt(tab.dataset.months);
-        calculateFee();
-      });
-    });
-
-    ptOffer.addEventListener('change', () => {
-      ptFeeGroup.style.display = ptOffer.value === 'yes' ? 'block' : 'none';
+  durationTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      durationTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      selectedMonths = parseInt(tab.dataset.months);
       calculateFee();
     });
+  });
 
-    document.getElementById('goal').addEventListener('change', calculateFee);
-    document.getElementById('memberType').addEventListener('change', calculateFee);
-    ptFeeInput.addEventListener('input', calculateFee);
+  ptOffer.addEventListener('change', () => {
+    ptFeeGroup.style.display = ptOffer.value === 'yes' ? 'block' : 'none';
+    calculateFee();
+  });
 
-    function calculateFee() {
-      const type = document.getElementById('memberType').value;
-      const goal = document.getElementById('goal').value;
-      let fee = 0;
+  document.getElementById('goal').addEventListener('change', calculateFee);
+  document.getElementById('memberType').addEventListener('change', calculateFee);
+  ptFeeInput.addEventListener('input', calculateFee);
 
-      if (goal === 'personal_training') {
-        fee = ptOffer.value === 'yes' ? parseInt(ptFeeInput.value) || 0 : 5000;
-      } else if (goal === 'strength_cardio') {
-        fee = strengthCardioFees[type]?.[selectedMonths] || 0;
-      } else {
-        fee = strengthOnlyFees[type]?.[selectedMonths] || 0;
-      }
+  function calculateFee() {
+    const type = document.getElementById('memberType').value;
+    const goal = document.getElementById('goal').value;
+    let fee = 0;
 
-      if (goal !== 'personal_training' && ptOffer.value === 'yes') {
-        fee += parseInt(ptFeeInput.value) || 0;
-      }
-
-      totalFeeInput.value = fee;
+    if (goal === 'personal_training') {
+      fee = ptOffer.value === 'yes' ? parseInt(ptFeeInput.value) || 0 : 5000;
+    } else if (goal === 'strength_cardio') {
+      fee = strengthCardioFees[type]?.[selectedMonths] || 0;
+    } else {
+      fee = strengthOnlyFees[type]?.[selectedMonths] || 0;
     }
 
-    function setDue() {
-      const jd = document.getElementById('join_date').value;
-      if (jd) {
-        const d = new Date(jd);
-        d.setDate(d.getDate() + 30);
-        document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
-      }
+    if (goal !== 'personal_training' && ptOffer.value === 'yes') {
+      fee += parseInt(ptFeeInput.value) || 0;
     }
 
-    function preview(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.getElementById('imagePreview');
-          img.src = e.target.result;
-          img.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
+    totalFeeInput.value = fee;
+  }
+
+  function setDue() {
+    const jd = document.getElementById('join_date').value;
+    if (jd) {
+      const d = new Date(jd);
+      d.setDate(d.getDate() + 30);
+      document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
     }
+  }
 
-    const existingPhones = ["9876543210", "1234567890"]; // Simulated check
+  function preview(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById('imagePreview');
+        img.src = e.target.result;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 
-    document.getElementById('clientForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const phone = document.getElementById('phone').value.trim();
-      if (existingPhones.includes(phone)) {
-        alert("Phone number already exists. No data updated.");
-        return;
-      }
-      alert("Form submitted successfully!");
-    });
+  // ✅ Replace static check with backend call
+  document.getElementById('clientForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const phone = phoneInput.value.trim();
 
-    // Default tab selection
-    durationTabs[0].click();
-  </script>
+    fetch(`/check_phone/${phone}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.exists) {
+          alert("Phone number already exists. No data updated.");
+        } else {
+          // Submit the form manually (or via AJAX if needed)
+          alert("Form submitted successfully!");
+          // this.submit(); // Optional: if using regular form post
+        }
+      })
+      .catch(error => {
+        console.error("Error checking phone number:", error);
+        alert("Could not verify phone number. Try again.");
+      });
+  });
+
+  // Default tab selection
+  durationTabs[0].click();
+</script>
+
 </body>
 </html>
 

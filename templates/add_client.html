@@ -108,14 +108,18 @@
         <input type="file" class="form-control" id="image" onchange="preview(this)">
         <img id="imagePreview" src="#" alt="Preview" style="display:none; max-width:100px; margin-top:10px;">
       </div>
-
-      <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-primary">Submit</button>
+      <div class="d-flex justify-content-between">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary">Submit</button>
       </div>
     </form>
+    <div class="text-center mt-3">
+      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Back Home</a>
+    </div>
   </div>
 
 <script>
+  // ---- Fee Structures (Declare only once!) ----
   const strengthOnlyFees = {
     student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
     general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
@@ -128,6 +132,7 @@
 
   let selectedMonths = 1;
 
+  // ---- DOM Elements ----
   const durationTabs = document.querySelectorAll('.tab');
   const ptOffer = document.getElementById('ptOffer');
   const ptFeeGroup = document.getElementById('ptFeeGroup');
@@ -135,6 +140,7 @@
   const totalFeeInput = document.getElementById('totalFee');
   const phoneInput = document.getElementById('phone');
 
+  // ---- Duration Tab Selection ----
   durationTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       durationTabs.forEach(t => t.classList.remove('active'));
@@ -144,18 +150,21 @@
     });
   });
 
-  ptOffer.addEventListener('change', () => {
+  // ---- PT Offer Toggle ----
+  ptOffer?.addEventListener('change', () => {
     ptFeeGroup.style.display = ptOffer.value === 'yes' ? 'block' : 'none';
     calculateFee();
   });
 
-  document.getElementById('goal').addEventListener('change', calculateFee);
-  document.getElementById('memberType').addEventListener('change', calculateFee);
-  ptFeeInput.addEventListener('input', calculateFee);
+  // ---- Trigger Fee Calculation on Change ----
+  document.getElementById('goal')?.addEventListener('change', calculateFee);
+  document.getElementById('memberType')?.addEventListener('change', calculateFee);
+  ptFeeInput?.addEventListener('input', calculateFee);
 
+  // ---- Fee Calculation Function ----
   function calculateFee() {
-    const type = document.getElementById('memberType').value;
-    const goal = document.getElementById('goal').value;
+    const type = document.getElementById('memberType')?.value;
+    const goal = document.getElementById('goal')?.value;
     let fee = 0;
 
     if (goal === 'personal_training') {
@@ -173,6 +182,35 @@
     totalFeeInput.value = fee;
   }
 
+  // ---- Old calcFee Function (Retained for backward compatibility) ----
+  function calcFee() {
+    const type = document.getElementById('clientType')?.value;
+    const goal = document.getElementById('goalSelect')?.value;
+    let fee = 0;
+
+    if (goal === "personal_training") {
+      fee = 5000;
+    } else if (goal === "strength_cardio") {
+      if (type === "student") {
+        fee = 1100;
+      } else if (type === "general") {
+        fee = 1300;
+      }
+    } else {
+      if (type === "student") {
+        fee = 800;
+      } else if (type === "general") {
+        fee = 1000;
+      }
+    }
+
+    const feeInput = document.getElementById('fees');
+    if (feeInput) {
+      feeInput.value = fee;
+    }
+  }
+
+  // ---- Set Due Date +30 Days ----
   function setDue() {
     const jd = document.getElementById('join_date').value;
     if (jd) {
@@ -182,6 +220,7 @@
     }
   }
 
+  // ---- Image Preview ----
   function preview(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
@@ -194,14 +233,13 @@
     }
   }
 
-  // ✅ Handle phone check and form validation
-  document.getElementById('clientForm').addEventListener('submit', function (e) {
+  // ---- Form Validation + Phone Number Check ----
+  document.getElementById('clientForm')?.addEventListener('submit', function (e) {
     e.preventDefault();
-    const phone = phoneInput.value.trim();
-    const weight = document.getElementById('weight').value.trim();
-    const paymentStatus = document.getElementById('payment_status').value;
+    const phone = phoneInput?.value.trim();
+    const weight = document.getElementById('weight')?.value.trim();
+    const paymentStatus = document.getElementById('payment_status')?.value;
 
-    // Optional: Validate required fields
     if (!phone || !weight || !paymentStatus) {
       alert("Please fill in all required fields.");
       return;
@@ -213,7 +251,6 @@
         if (data.exists) {
           alert("Phone number already exists. No data updated.");
         } else {
-          // ✅ Submit the form
           this.submit();
         }
       })
@@ -223,9 +260,12 @@
       });
   });
 
-  // Default tab selection
-  durationTabs[0].click();
+  // ---- Default Duration Tab ----
+  if (durationTabs.length > 0) {
+    durationTabs[0].click();
+  }
 </script>
+
 
 </body>
 </html>

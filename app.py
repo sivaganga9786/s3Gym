@@ -12,7 +12,7 @@ from flask import request
 # Flask config
 # Flask config
 import urllib.parse
-from flask import jsonify
+
 app = Flask(__name__)
 
 # Ensure proper PostgreSQL URI handling
@@ -97,11 +97,6 @@ def financial_summary():
 @app.route('/')
 def root():
     return redirect(url_for('home'))
-
-@app.route('/check_phone/<phone>')
-def check_phone(phone):
-    exists = db.session.query(Client).filter_by(contact=phone).first() is not None
-    return jsonify({"exists": exists})
 
 @app.route('/home')
 def home():

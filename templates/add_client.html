@@ -1,157 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Add Client</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Gym Registration</title>
   <style>
-    .preview-img {
-      max-height: 100px;
-      display: none;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      margin-top: 10px;
+    .tab {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background-color: #ddd;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .tab.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .input-group {
+      margin: 10px 0;
+    }
+
+    label {
+      display: block;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 6px;
     }
   </style>
 </head>
-<body class="bg-light p-4">
-  <div class="container">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="card-title text-center">New Client Registration</h2>
-        <form method="POST" enctype="multipart/form-data">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label>Name</label>
-              <input name="name" class="form-control" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label>Contact</label>
-              <input name="contact" class="form-control" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label>Goal</label>
-            <select name="goal" class="form-select" id="goalSelect" onchange="calcFee()" required>
-              <option value="">Select</option>
-              <option value="strength_cardio">Strength and Cardio</option>
-              <option value="personal_training">Personal Training</option>
-              <option value="Fitness_Training">Fitness Training </option>
-              <option value="strength">Strength</option>
-            </select>
-          </div>
-          <div class="row">
-            <div class="col-md-4 mb-3">
-              <label>Weight (kg)</label>
-              <input name="weight" type="number" class="form-control" step="0.1" min="40" max="110" required>
-            </div>
-          <div class="col-md-4 mb-3">
-              <label>Gender</label>
-              <select name="gender" class="form-select" required>
-                <option value="">Select</option>
-                <option>Male</option>
-                <option>Female</option>
-              </select>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label>Type</label>
-              <select name="client_type" id="clientType" class="form-select" onchange="calcFee()" required>
-                <option value="">Select</option>
-                <option value="student">Student</option>
-                <option value="general">General</option>
-              </select>
-            </div>
-          </div>
+<body>
 
-          <div class="mb-3">
-            <label>Monthly Fee (₹)</label>
-            <input name="fees" id="fees" readonly class="form-control">
-          </div>
+<h2>Gym Registration Form</h2>
 
+<form id="registrationForm">
+  <div class="input-group">
+    <label>Member Type:</label>
+    <select id="memberType">
+      <option value="student">Student</option>
+      <option value="general">General</option>
+    </select>
+  </div>
 
-           <div class="row">
-            <div class="col-md-6 mb-3">
-              <label>Join Date</label>
-              <input name="join_date" id="join_date" type="date" class="form-control" onchange="setDue()" required>
-              <small>Due auto +30 days</small>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label>Due Date</label>
-              <input name="payment_due_date" id="payment_due_date" type="date" class="form-control" readonly required>
-            </div>
-          </div>
+  <div class="input-group">
+    <label>Goal:</label>
+    <select id="goal">
+      <option value="strength">Strength Only</option>
+      <option value="cardio">Strength + Cardio</option>
+    </select>
+  </div>
 
-          <div class="mb-3">
-            <label>Payment Status</label>
-            <select name="payment_status" class="form-select" required>
-              <option value="">Select</option>
-              <option value="paid">Paid</option>
-              <option value="unpaid">Unpaid</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label>Profile Image</label>
-            <input name="profile_image" type="file" accept="image/*" class="form-control" onchange="preview(this)">
-            <img id="imagePreview" class="preview-img">
-          </div>
+  <div class="input-group">
+    <label>PT Offer:</label>
+    <select id="ptOffer">
+      <option value="no">No</option>
+      <option value="yes">Yes</option>
+    </select>
+  </div>
 
-          <div class="d-flex justify-content-between">
-            <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
-            <button class="btn btn-primary">Submit</button>
-          </div>
-        </form>
-      </div>
-    </div>
-    <div class="text-center mt-3">
-      <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Back Home</a>
+  <div class="input-group" id="ptFeeGroup" style="display: none;">
+    <label>PT Fee (Manual Entry):</label>
+    <input type="number" id="ptFee" placeholder="Enter PT fee">
+  </div>
+
+  <div class="input-group">
+    <label>Choose Duration:</label>
+    <div id="durationTabs">
+      <span class="tab" data-months="1">1 Month</span>
+      <span class="tab" data-months="3">3 Months</span>
+      <span class="tab" data-months="6">6 Months</span>
+      <span class="tab" data-months="12">1 Year</span>
     </div>
   </div>
-  <script>
-    function setDue() {
-      const jd = document.getElementById('join_date').value;
-      if (jd) {
-        const d = new Date(jd);
-        d.setDate(d.getDate() + 30);
-        document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
-      }
+
+  <div class="input-group">
+    <label>Total Fee:</label>
+    <input type="text" id="totalFee" readonly>
+  </div>
+
+</form>
+
+<script>
+  const strengthOnlyFees = {
+    student: { 1: 800, 3: 2300, 6: 4200, 12: 7800 },
+    general: { 1: 1000, 3: 2700, 6: 5100, 12: 9500 }
+  };
+
+  const strengthCardioFees = {
+    student: { 1: 1100, 3: 3000, 6: 5800, 12: 9000 },
+    general: { 1: 1300, 3: 3600, 6: 6900, 12: 13000 }
+  };
+
+  let selectedDuration = null;
+
+  const durationTabs = document.querySelectorAll('.tab');
+  durationTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      durationTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      selectedDuration = parseInt(tab.dataset.months);
+      updateFee();
+    });
+  });
+
+  document.getElementById('memberType').addEventListener('change', updateFee);
+  document.getElementById('goal').addEventListener('change', updateFee);
+  document.getElementById('ptOffer').addEventListener('change', () => {
+    const ptOffer = document.getElementById('ptOffer').value;
+    const ptFeeGroup = document.getElementById('ptFeeGroup');
+    ptFeeGroup.style.display = ptOffer === 'yes' ? 'block' : 'none';
+    updateFee();
+  });
+
+  document.getElementById('ptFee').addEventListener('input', updateFee);
+
+  function updateFee() {
+    if (!selectedDuration) return;
+
+    const memberType = document.getElementById('memberType').value;
+    const goal = document.getElementById('goal').value;
+    const ptOffer = document.getElementById('ptOffer').value;
+    const ptFee = parseInt(document.getElementById('ptFee').value) || 0;
+
+    let baseFee = 0;
+
+    if (goal === 'strength') {
+      baseFee = strengthOnlyFees[memberType][selectedDuration];
+    } else {
+      baseFee = strengthCardioFees[memberType][selectedDuration];
     }
 
-    function calcFee() {
-      const type = document.getElementById('clientType').value;
-      const goal = document.getElementById('goalSelect').value;
+    let totalFee = baseFee;
 
-      let fee = 0;
-
-      if (goal === "personal_training") {
-        fee = 5000;
-      } else if (goal === "strength_cardio") {
-        if (type === "student") {
-          fee = 1100;
-        } else if (type === "general") {
-          fee = 1300;
-        }
-      } else {
-        if (type === "student") {
-          fee = 800;
-        } else if (type === "general") {
-          fee = 1000;
-        }
-      }
-
-      document.getElementById('fees').value = fee;
+    if (ptOffer === 'yes') {
+      totalFee += ptFee;
     }
 
-    function preview(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.getElementById('imagePreview');
-          img.src = e.target.result;
-          img.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-  </script>
+    document.getElementById('totalFee').value = totalFee + ' ₹';
+  }
+</script>
+
 </body>
 </html>

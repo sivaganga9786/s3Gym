@@ -40,6 +40,17 @@
               <option value="strength">Strength</option>
             </select>
           </div>
+          <div class="mb-3">
+            <label>Plan Duration</label>
+            <select name="duration" id="duration" class="form-select" onchange="calcFee()" required>
+              <option value="">Select</option>
+              <option value="1">1 Month</option>
+              <option value="3">3 Months</option>
+              <option value="6">6 Months</option>
+              <option value="12">1 Year</option>
+            </select>
+          </div>
+
           <div class="row">
             <div class="col-md-4 mb-3">
               <label>Weight (kg)</label>
@@ -119,22 +130,29 @@
     function calcFee() {
       const type = document.getElementById('clientType').value;
       const goal = document.getElementById('goalSelect').value;
+      const duration = parseInt(document.getElementById('duration').value);
+
+      const fees = {
+        student: {
+          strength:     {1: 800, 3: 2300, 6: 4200, 12: 7800},
+          strength_cardio: {1: 1100, 3: 3000, 6: 5800, 12: 9000}
+        },
+        general: {
+          strength:     {1: 1000, 3: 2700, 6: 5100, 12: 9500},
+          strength_cardio: {1: 1300, 3: 3600, 6: 6900, 12: 13000}
+        },
+        personal_training: {
+          fixed: 5000  // flat fee regardless of type/duration
+        }
+      };
 
       let fee = 0;
 
       if (goal === "personal_training") {
-        fee = 5000;
-      } else if (goal === "strength_cardio") {
-        if (type === "student") {
-          fee = 1100;
-        } else if (type === "general") {
-          fee = 1300;
-        }
-      } else {
-        if (type === "student") {
-          fee = 800;
-        } else if (type === "general") {
-          fee = 1000;
+        fee = fees.personal_training.fixed;
+      } else if (type && goal && duration) {
+        if (fees[type] && fees[type][goal] && fees[type][goal][duration]) {
+          fee = fees[type][goal][duration];
         }
       }
 

@@ -293,6 +293,12 @@ def add_client():
                 flash("Weight must be between 40–110 kg.", 'danger')
                 return render_template('add_client.html')
 
+            # ✅ New: Check for duplicate contact
+            existing_client = Client.query.filter_by(contact=contact).first()
+            if existing_client:
+                flash("Client with this phone number already exists.", 'danger')
+                return render_template('add_client.html')
+
             # Image upload (optional)
             image_url = None
             file = request.files.get('profile_image')
@@ -329,6 +335,7 @@ def add_client():
             return render_template('add_client.html')
 
     return render_template('add_client.html')
+
 
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])

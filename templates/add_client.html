@@ -78,6 +78,10 @@
             <label>Monthly Fee (₹)</label>
             <input name="fees" id="fees" readonly class="form-control">
           </div>
+          <div class="form-check mb-3" id="ptOfferContainer" style="display:none;">
+            <input type="checkbox" class="form-check-input" id="ptOfferToggle" onchange="togglePtOffer()">
+            <label class="form-check-label" for="ptOfferToggle">Apply PT Offer (Manual Fee)</label>
+          </div>
 
 
            <div class="row">
@@ -117,59 +121,81 @@
       <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Back Home</a>
     </div>
   </div>
-  <script>
-    function setDue() {
-      const jd = document.getElementById('join_date').value;
-      if (jd) {
-        const d = new Date(jd);
-        d.setDate(d.getDate() + 30);
-        document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
+<script>
+  function setDue() {
+    const jd = document.getElementById('join_date').value;
+    if (jd) {
+      const d = new Date(jd);
+      d.setDate(d.getDate() + 30);
+      document.getElementById('payment_due_date').value = d.toISOString().split('T')[0];
+    }
+  }
+
+  function calcFee() {
+    const type = document.getElementById('clientType').value;
+    const goal = document.getElementById('goalSelect').value;
+    const duration = parseInt(document.getElementById('duration')?.value || "0");
+    const feesField = document.getElementById('fees');
+    const ptOfferContainer = document.getElementById('ptOfferContainer');
+    const ptOfferToggle = document.getElementById('ptOfferToggle');
+
+    // Default behavior
+    feesField.readOnly = true;
+    ptOfferContainer.style.display = 'none';
+    ptOfferToggle.checked = false;
+
+    const fees = {
+      student: {
+        strength:         {1: 800, 3: 2300, 6: 4200, 12: 7800},
+        strength_cardio:  {1: 1100, 3: 3000, 6: 5800, 12: 9000}
+      },
+      general: {
+        strength:         {1: 1000, 3: 2700, 6: 5100, 12: 9500},
+        strength_cardio:  {1: 1300, 3: 3600, 6: 6900, 12: 13000}
+      },
+      personal_training: {
+        fixed: 5000
       }
+    };
+
+    let fee = 0;
+
+    if (goal === "personal_training") {
+      // Show manual override for PT
+      ptOfferContainer.style.display = 'block';
+      fee = fees.personal_training.fixed;
+    } else if (type && goal && duration) {
+      fee = fees[type]?.[goal]?.[duration] || 0;
     }
 
-    function calcFee() {
-      const type = document.getElementById('clientType').value;
-      const goal = document.getElementById('goalSelect').value;
-      const duration = parseInt(document.getElementById('duration').value);
+    feesField.value = fee;
+  }
 
-      const fees = {
-        student: {
-          strength:     {1: 800, 3: 2300, 6: 4200, 12: 7800},
-          strength_cardio: {1: 1100, 3: 3000, 6: 5800, 12: 9000}
-        },
-        general: {
-          strength:     {1: 1000, 3: 2700, 6: 5100, 12: 9500},
-          strength_cardio: {1: 1300, 3: 3600, 6: 6900, 12: 13000}
-        },
-        personal_training: {
-          fixed: 5000  // flat fee regardless of type/duration
-        }
+  function togglePtOffer() {
+    const feesField = document.getElementById('fees');
+    const isChecked = document.getElementById('ptOfferToggle').checked;
+
+    if (isChecked) {
+      feesField.readOnly = false;
+      feesField.focus();
+    } else {
+      feesField.readOnly = true;
+      calcFee(); // reset fee
+    }
+  }
+
+  function preview(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById('imagePreview');
+        img.src = e.target.result;
+        img.style.display = 'block';
       };
-
-      let fee = 0;
-
-      if (goal === "personal_training") {
-        fee = fees.personal_training.fixed;
-      } else if (type && goal && duration) {
-        if (fees[type] && fees[type][goal] && fees[type][goal][duration]) {
-          fee = fees[type][goal][duration];
-        }
-      }
-
-      document.getElementById('fees').value = fee;
+      reader.readAsDataURL(input.files[0]);
     }
+  }
+</script>
 
-    function preview(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = document.getElementById('imagePreview');
-          img.src = e.target.result;
-          img.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
-  </script>
 </body>
 </html>

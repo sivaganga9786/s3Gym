@@ -97,15 +97,16 @@ def financial_summary():
 def root():
     return redirect(url_for('home'))
 
+
 @app.route('/home')
 def home():
     if session.get('admin_logged_in'):
         today = datetime.today().date()
         next_3_days = today + timedelta(days=3)
 
-        total_clients = Client.query.filter_by(is_active=True).count()
-        total_students = Client.query.filter_by(client_type='student', is_active=True).count()
-        total_general = Client.query.filter_by(client_type='general', is_active=True).count()
+        total_clients = Client.query.filter_by(is_active=True, payment_status='paid').count()
+        total_students = Client.query.filter_by(client_type='student', is_active=True, payment_status='paid').count()
+        total_general = Client.query.filter_by(client_type='general', is_active=True, payment_status='paid').count()
         due_clients_count = Client.query.filter(
             Client.payment_status == 'unpaid',
             Client.payment_due_date <= next_3_days,

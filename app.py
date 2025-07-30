@@ -9,6 +9,7 @@ import cloudinary.uploader
 from sqlalchemy import text  # for one-time column addition
 from sqlalchemy import extract, func
 from flask import request
+from dateutil.relativedelta import relativedelta
 # Flask config
 # Flask config
 import urllib.parse
@@ -290,7 +291,10 @@ def add_client():
 
             # Parse dates
             join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
-            due = join_date + timedelta(days=30)
+
+            # ✅ Payment due date calculation based on duration
+            duration_months = int(duration) if duration and duration.isdigit() else 1
+            due = join_date + timedelta(days=duration_months * 30)
 
             # Validation
             if not all([name, contact, gender, client_type, join_date_str, payment_status, goal, duration]):
@@ -343,9 +347,6 @@ def add_client():
             return render_template('add_client.html')
 
     return render_template('add_client.html')
-
-
-
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):

@@ -8,10 +8,8 @@ import cloudinary
 import cloudinary.uploader
 from sqlalchemy import text  # for one-time column addition
 from sqlalchemy import extract, func
-from flask import request
-# Flask config
-# Flask config
 import urllib.parse
+from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__)
 
@@ -255,6 +253,7 @@ def mark_paid(client_id):
     flash(f"{client.name} marked as paid.", "success")
     return redirect(url_for('due_clients'))
 
+
 @app.route('/add', methods=['GET', 'POST'])
 def add_client():
     if not session.get('admin_logged_in'):
@@ -270,7 +269,7 @@ def add_client():
             join_date_str = request.form['join_date']
             payment_status = request.form['payment_status']
             goal = request.form.get('goal')
-            duration = request.form.get('duration')  # ✅ newly added
+            duration = request.form.get('duration')  # ✅ used for plan duration
 
             # Optional fields
             weight = float(request.form['weight']) if request.form.get('weight') else None
@@ -288,9 +287,22 @@ def add_client():
                 flash("Contact must be 10 digits or start with +91.", 'danger')
                 return render_template('add_client.html')
 
-            # Parse dates
+            # Parse joining date
             join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
-            due = join_date + timedelta(days=30)
+
+            # ✅ Calculate due date based on selected duration
+            duration_map = {
+                '1': 1,
+                '3': 3,
+                '6': 6,
+                '12': 12
+            }
+            months_to_add = duration_map.get(duration)
+            if not months_to_add:
+                flash("Invalid plan duration selected.", 'danger')
+                return render_template('add_client.html')
+
+            due = join_date + relativedelta(months=months_to_add)
 
             # Validation
             if not all([name, contact, gender, client_type, join_date_str, payment_status, goal, duration]):
@@ -301,7 +313,10 @@ def add_client():
                 flash("Weight must be between 40–110 kg.", 'danger')
                 return render_template('add_client.html')
 
-            # ✅ New: Check for duplicate contact
+            # ✅ Check for duplicate contact
+            from your_app import db  # Make sure to adjust based on your actual structure
+            from your_app.models import Client
+
             existing_client = Client.query.filter_by(contact=contact).first()
             if existing_client:
                 flash("Client with this phone number already exists.", 'danger')
@@ -310,7 +325,7 @@ def add_client():
             # Image upload (optional)
             image_url = None
             file = request.files.get('profile_image')
-            if file and allowed_file(file.filename):
+            if file and file.filename != '' and '.' in file.filename:
                 upload_result = cloudinary.uploader.upload(file)
                 image_url = upload_result.get("secure_url")
 
@@ -343,8 +358,6 @@ def add_client():
             return render_template('add_client.html')
 
     return render_template('add_client.html')
-
-
 
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])

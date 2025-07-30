@@ -163,7 +163,6 @@
     let fee = 0;
 
     if (goal === "personal_training") {
-      // Show manual override for PT
       ptOfferContainer.style.display = 'block';
       fee = fees.personal_training.fixed;
     } else if (type && goal && duration) {
@@ -197,6 +196,19 @@
       reader.readAsDataURL(input.files[0]);
     }
   }
+
+  // 🟡 Auto-bind events when the page loads
+  window.addEventListener('DOMContentLoaded', function () {
+    const elementsToWatch = ['join_date', 'duration', 'clientType', 'goalSelect'];
+
+    elementsToWatch.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('change', () => {
+        setDue();
+        calcFee();
+      });
+    });
+  });
 </script>
 
 

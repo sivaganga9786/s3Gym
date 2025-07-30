@@ -261,42 +261,61 @@ def add_client():
 
     if request.method == 'POST':
         try:
+            # Required fields
             name = request.form['name']
             contact = request.form['contact']
             gender = request.form['gender']
             client_type = request.form['client_type']
-            join_date = datetime.strptime(request.form['join_date'], "%Y-%m-%d").date()
+            join_date_str = request.form['join_date']
             payment_status = request.form['payment_status']
             goal = request.form.get('goal')
+            duration = request.form.get('duration')  # ✅ newly added
+
+            # Optional fields
             weight = float(request.form['weight']) if request.form.get('weight') else None
             fees = int(request.form['fees']) if request.form.get('fees') else 0
+
+            # Parse dates
+            join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
             due = join_date + timedelta(days=30)
 
-            if not all([name, contact, gender, client_type, join_date, payment_status]):
+            # Validation
+            if not all([name, contact, gender, client_type, join_date_str, payment_status, goal, duration]):
                 flash("All required fields must be filled.", 'danger')
-                return redirect(url_for('add_client'))
+                return render_template('add_client.html')
 
             if not contact.isdigit() or len(contact) != 10:
                 flash("Contact must be 10 digits.", 'danger')
-                return redirect(url_for('add_client'))
+                return render_template('add_client.html')
 
-            if weight and (weight < 50 or weight > 110):
-                flash("Weight must be between 50–110kg.", 'danger')
-                return redirect(url_for('add_client'))
+            if weight and (weight < 40 or weight > 110):
+                flash("Weight must be between 40–110 kg.", 'danger')
+                return render_template('add_client.html')
 
+            # Image upload (optional)
             image_url = None
             file = request.files.get('profile_image')
             if file and allowed_file(file.filename):
                 upload_result = cloudinary.uploader.upload(file)
                 image_url = upload_result.get("secure_url")
 
+            # Create and save the client
             client = Client(
-                name=name, contact=contact, goal=goal, weight=weight,
-                gender=gender, client_type=client_type, fees=fees,
-                payment_status=payment_status, join_date=join_date,
-                payment_due_date=due, profile_image=image_url,
-                last_updated=datetime.now(), is_active=True
+                name=name,
+                contact=contact,
+                goal=goal,
+                weight=weight,
+                gender=gender,
+                client_type=client_type,
+                fees=fees,
+                payment_status=payment_status,
+                join_date=join_date,
+                payment_due_date=due,
+                profile_image=image_url,
+                last_updated=datetime.now(),
+                is_active=True
             )
+
             db.session.add(client)
             db.session.commit()
             flash("Client added!", 'success')
@@ -306,9 +325,10 @@ def add_client():
             import traceback
             traceback.print_exc()
             flash(f"Error: {e}", 'danger')
-            return redirect(url_for('add_client'))
+            return render_template('add_client.html')
 
     return render_template('add_client.html')
+
 
 @app.route('/edit/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):

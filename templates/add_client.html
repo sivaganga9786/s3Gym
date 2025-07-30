@@ -40,15 +40,14 @@
               <option value="strength">Strength</option>
             </select>
           </div>
-
           <div class="mb-3">
-            <label for="duration" class="form-label">Plan Duration (in months)</label>
-            <select class="form-select" id="duration" name="duration" required>
-              <option value="">Select duration</option>
+            <label>Plan Duration</label>
+            <select name="duration" id="duration" class="form-select" onchange="calcFee()" required>
+              <option value="">Select</option>
               <option value="1">1 Month</option>
               <option value="3">3 Months</option>
               <option value="6">6 Months</option>
-              <option value="12">12 Months</option>
+              <option value="12">1 Year</option>
             </select>
           </div>
 

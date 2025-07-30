@@ -262,7 +262,7 @@ def add_client():
     if request.method == 'POST':
         try:
             # Required fields
-            name = request.form['name']
+            name = request.form['name'].upper()
             contact = request.form['contact']
             gender = request.form['gender']
             client_type = request.form['client_type']

@@ -276,6 +276,18 @@ def add_client():
             weight = float(request.form['weight']) if request.form.get('weight') else None
             fees = int(request.form['fees']) if request.form.get('fees') else 0
 
+            # Prepend +91 to contact if not already present
+            contact = contact.strip()
+            if contact.startswith('+91'):
+                pass
+            elif contact.startswith('91') and len(contact) == 12:
+                contact = '+' + contact
+            elif len(contact) == 10 and contact.isdigit():
+                contact = '+91' + contact
+            else:
+                flash("Contact must be 10 digits or start with +91.", 'danger')
+                return render_template('add_client.html')
+
             # Parse dates
             join_date = datetime.strptime(join_date_str, "%Y-%m-%d").date()
             due = join_date + timedelta(days=30)
@@ -283,10 +295,6 @@ def add_client():
             # Validation
             if not all([name, contact, gender, client_type, join_date_str, payment_status, goal, duration]):
                 flash("All required fields must be filled.", 'danger')
-                return render_template('add_client.html')
-
-            if not contact.isdigit() or len(contact) != 10:
-                flash("Contact must be 10 digits.", 'danger')
                 return render_template('add_client.html')
 
             if weight and (weight < 40 or weight > 110):
@@ -335,6 +343,7 @@ def add_client():
             return render_template('add_client.html')
 
     return render_template('add_client.html')
+
 
 
 

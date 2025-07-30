@@ -73,11 +73,11 @@ def financial_summary():
     selected_month = int(request.args.get("month", datetime.now().month))
     selected_year = int(request.args.get("year", datetime.now().year))
 
-    # Filter paid clients only for the selected month/year
+    # Use payment_date instead of join_date if available
     clients = Client.query.filter(
         Client.payment_status == 'paid',
-        db.extract('month', Client.join_date) == selected_month,
-        db.extract('year', Client.join_date) == selected_year
+        db.extract('month', Client.payment_date) == selected_month,
+        db.extract('year', Client.payment_date) == selected_year
     ).all()
 
     student_total = sum(c.fees for c in clients if c.client_type == "student")
@@ -92,6 +92,7 @@ def financial_summary():
         selected_year=selected_year,
         current_year=datetime.now().year
     )
+
 
 # Routes
 @app.route('/')

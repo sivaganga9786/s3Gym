@@ -313,9 +313,7 @@ def add_client():
                 flash("Weight must be between 40–110 kg.", 'danger')
                 return render_template('add_client.html')
 
-            # ✅ Check for duplicate contact
-            from your_app import db  # Make sure to adjust based on your actual structure
-            from your_app.models import Client
+
 
             existing_client = Client.query.filter_by(contact=contact).first()
             if existing_client:
